@@ -1,0 +1,108 @@
+<!-- Deprecated: no real communication/send endpoint exists. -->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Donor Communication - LifeDrop Core</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/><link href="../../css/responsive.css" rel="stylesheet"/></head>
+<body class="light dashboard-body" data-page="donor-communication">
+<div class="dash-app">
+<aside class="dash-sidebar">
+<div class="dash-stack-2">
+<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+  <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+  <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-brand__title">LifeDrop Core</div>
+    <div class="dash-brand__subtitle">Blood Management</div>
+  </div>
+</div>
+</div>
+<nav class="dash-nav"></nav>
+<div class="dash-sidebar__footer"><a class="dash-nav__item" href="#" id="sidebar-logout-btn">Logout</a></div>
+</aside>
+<main class="dash-main">
+<header class="dash-topbar">
+<div class="dash-topbar__group">
+<div class="dash-search">
+<span class="dash-search__icon">⌕</span>
+<input placeholder="Search donors or requests..." type="text"/>
+</div>
+<div class="dash-link-alert">Emergency Alert</div>
+</div>
+<div class="dash-topbar__group">
+<button class="dash-btn dash-btn--danger" type="button">Emergency</button>
+<button aria-label="Action button" class="dash-icon-btn" type="button">🔔</button>
+<button aria-label="Action button" class="dash-icon-btn" type="button">◎</button>
+<div class="dash-user-chip">Admin</div>
+</div>
+</header>
+<div class="dash-content">
+<section class="dash-page-header">
+<div class="dash-row-between">
+<div class="dash-stack-2">
+<h1 class="dash-title-xl">Donor Communication</h1>
+<p class="dash-subtitle">One structured communication layer for chat, outreach, and call escalation during urgent requests.</p>
+</div>
+</div>
+</section>
+<section class="dash-chat-shell">
+<article class="dash-card"><div class="dash-card__body dash-stack-5">
+<div class="dash-row-between">
+<div><div class="dash-label">Active Thread</div><h2 class="dash-title-md">Donor Coordination</h2></div>
+<span class="dash-badge dash-badge--critical">Critical Match Required</span>
+</div>
+<div class="dash-chat-list" id="dc-chat-list">
+<div class="dash-muted">Loading communications...</div>
+</div>
+<div class="dash-row u-inline-53">
+<input class="dash-input u-inline-54" placeholder="Type your message..."/>
+<button class="dash-btn dash-btn--primary" data-loading-text="Processing..." type="button">Send</button>
+</div>
+</div></article>
+<aside class="dash-grid">
+<article class="dash-call-card dash-stack-5">
+<div class="dash-call-avatar"></div>
+<div class="u-inline-44"><h2 class="dash-title-md">Marcus Thorne</h2><div class="dash-muted">O- Compatible • Confirmed Donor</div></div>
+<div class="dash-call-timer">04:12</div>
+<div class="dash-call-actions"><button aria-label="Action button" class="dash-icon-btn" type="button">🎙</button><button aria-label="Action button" class="dash-icon-btn u-inline-55" type="button">☎</button><button aria-label="Action button" class="dash-icon-btn" type="button">⟳</button></div>
+</article>
+<article class="dash-card"><div class="dash-card__body dash-stack-4">
+<h3 class="dash-title-md u-inline-41">Escalation Checklist</h3>
+<div class="dash-kpi"><strong>Confirm ETA</strong><div class="dash-muted">Verify donor can reach the facility in the critical window.</div></div>
+<div class="dash-kpi"><strong>Identity Check</strong><div class="dash-muted">Cross-check active donor credentials before intake.</div></div>
+<div class="dash-kpi"><strong>Backup Outreach</strong><div class="dash-muted">Ping secondary donor list if no response in 3 minutes.</div></div>
+</div></article>
+</aside>
+</section>
+</div>
+</main>
+</div>
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  (function () {
+    var user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (!user) {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    if (user.role === 'SystemAdmin') {
+      window.location.replace('../system-admin/dashboard.html');
+      return;
+    }
+    if (user.role !== 'HospitalAdmin' && user.role !== 'HospitalEmployee') {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    // Logout is wired by renderSidebar() in pages.js
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Dashboard | LifeDrop Core</title>
+
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/>
+<link href="../../css/responsive.css" rel="stylesheet"/>
+</head>
+
+<body class="light dashboard-body" data-page="system-admin-dashboard">
+<div class="dash-app dash-app--admin">
+
+<aside class="dash-sidebar dash-sidebar--admin">
+  <div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+    <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+    <div>
+      <div class="dash-brand__title">LifeDrop Core</div>
+      <div class="dash-brand-card__eyebrow">System Admin Portal</div>
+    </div>
+  </div>
+
+  <nav class="dash-nav">
+    <a class="dash-nav__item dash-nav__item--admin is-active" href="dashboard.html">Dashboard</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="create-hospital.html">Create Hospital</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="create-hospital-admin.html">Create Admin</a>
+  </nav>
+
+  <div class="dash-session-card dash-session-card--footer">
+    <div class="dash-session-card__avatar" id="go-user-avatar">SA</div>
+    <div>
+      <strong>System Admin</strong>
+      <div class="dash-muted" id="go-user-email">—</div>
+    </div>
+  </div>
+</aside>
+
+<main class="dash-main">
+<header class="dash-topbar">
+  <div class="dash-search dash-admin-search">
+    <span class="dash-search__icon">⌕</span>
+    <input placeholder="System admin view..." type="text"/>
+  </div>
+  <div class="dash-admin-toolbar">
+    <button class="dash-btn dash-btn--secondary" id="go-logout-btn" type="button">Logout</button>
+    <div class="dash-user-chip dash-user-chip--brand">SystemAdmin</div>
+  </div>
+</header>
+
+<div class="dash-content">
+
+<section class="dash-page-header">
+  <div class="dash-stack-2">
+    <h1 class="dash-title-hero">Global Operations</h1>
+    <p class="dash-subtitle">Live system stats from <code>GET /api/Admin/operations</code>.</p>
+  </div>
+</section>
+
+<!-- Stats grid — filled by initGlobalOperations() in pages.js -->
+<section class="dash-grid dash-grid--4" style="margin-bottom:24px;" id="sa-dashboard-root">
+  <article class="dash-card">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Total Donors</div>
+      <div class="dash-stat-card__value" id="sa-donors">--</div>
+    </div>
+  </article>
+  <article class="dash-card">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Total Hospitals</div>
+      <div class="dash-stat-card__value" id="sa-hospitals">--</div>
+    </div>
+  </article>
+  <article class="dash-card dash-card--alert">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Total Requests</div>
+      <div class="dash-stat-card__value" id="sa-critical">--</div>
+    </div>
+  </article>
+  <article class="dash-card">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Bags Collected</div>
+      <div class="dash-stat-card__value" id="sa-response">--</div>
+    </div>
+  </article>
+</section>
+
+<!-- Activity feed + regions — filled by initGlobalOperations() -->
+<section class="dash-grid dash-layout-aside">
+  <article class="dash-card">
+    <div class="dash-card__body dash-stack-5">
+      <div>
+        <h2 class="dash-title-md">Live Activity Feed</h2>
+        <div class="dash-muted">From <code>/api/Admin/operations</code> → <code>feed</code></div>
+      </div>
+      <div class="dash-feed-list" id="sa-feed"></div>
+    </div>
+  </article>
+  <aside class="dash-card">
+    <div class="dash-card__body dash-stack-5">
+      <h2 class="dash-title-md">Active Regions</h2>
+      <div id="sa-regions" class="sa-region-list"></div>
+    </div>
+  </aside>
+</section>
+
+</section>
+
+<section class="dash-page-header" style="margin-top: 32px;">
+  <div class="dash-stack-2">
+    <h2 class="dash-title-md">Hospital Management</h2>
+    <p class="dash-subtitle">From <code>GET /api/Admin/hospitals</code></p>
+  </div>
+</section>
+
+<section class="dash-card">
+  <div class="dash-table-wrap">
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Hospital Name</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="sa-hospitals-tbody">
+        <tr>
+          <td colspan="4" class="dash-muted" style="text-align: center; padding: 24px;">
+            Loading hospitals...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Employees Modal -->
+<dialog class="dash-modal" id="sa-emp-modal">
+  <div class="dash-modal__card" style="width: 800px; max-width: 95%;">
+    <div class="dash-modal__header">
+      <h3 class="dash-modal__title" id="sa-emp-modal-title">Hospital Employees</h3>
+      <button class="dash-modal__close" id="sa-emp-modal-close" type="button">×</button>
+    </div>
+    <div class="dash-modal__body">
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sa-emp-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+</div><!-- /.dash-content -->
+</main>
+</div><!-- /.dash-app -->
+
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  // Populate user email in sidebar from JWT and check Auth
+  document.addEventListener('DOMContentLoaded', function () {
+    var user = window.LifeDropApi && LifeDropApi.getCurrentUser();
+    if (!user || user.role !== 'SystemAdmin') {
+      window.location.replace('../auth/login.html');
+      return;
+    }
+    if (user && user.email) {
+      var el = document.getElementById('go-user-email');
+      if (el) el.textContent = user.email;
+    }
+    var logoutBtn = document.getElementById('go-logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        LifeDropApi.clearTokens();
+        window.location.href = '../../pages/auth/login.html';
+      });
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Donor Verification - LifeDrop Core</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/><link href="../../css/responsive.css" rel="stylesheet"/></head>
+<body class="light dashboard-body" data-page="donor-verification">
+<div class="dash-app">
+<aside class="dash-sidebar">
+<div class="dash-stack-2">
+<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+  <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+  <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-brand__title">LifeDrop Core</div>
+    <div class="dash-brand__subtitle">Blood Management</div>
+  </div>
+</div>
+</div>
+<nav class="dash-nav"></nav>
+<div class="dash-sidebar__footer"><a class="dash-nav__item" href="#" id="sidebar-logout-btn">Logout</a></div>
+</aside>
+<main class="dash-main">
+<header class="dash-topbar">
+<div class="dash-topbar__group">
+<div class="dash-search">
+<span class="dash-search__icon">⌕</span>
+<input placeholder="Search donors or requests..." type="text"/>
+</div>
+<div class="dash-link-alert">Emergency Alert</div>
+</div>
+<div class="dash-topbar__group">
+<button class="dash-btn dash-btn--danger" type="button">Emergency</button>
+<button aria-label="Action button" class="dash-icon-btn" type="button">🔔</button>
+<button aria-label="Action button" class="dash-icon-btn" type="button">◎</button>
+<div class="dash-user-chip">Admin</div>
+</div>
+</header>
+<div class="dash-content" id="dv-wrap">
+  <section class="dash-page-header">
+    <div class="dash-row-between">
+      <div class="dash-stack-3">
+        <span class="dash-badge dash-badge--normal">Verification Stage</span>
+        <div>
+          <h1 class="dash-title-xl">Verify Donor</h1>
+          <p class="dash-subtitle">Confirm medical eligibility to finalize donation.</p>
+        </div>
+      </div>
+      <div class="dash-stack-2" style="text-align:right;">
+        <div class="dash-label">Acceptance ID</div>
+        <div class="dash-title-md" id="dv-acceptance-id">Loading...</div>
+      </div>
+    </div>
+  </section>
+
+  <div id="dv-error" class="dash-card dash-card--alert" style="display:none;margin-bottom:24px;">
+    <div class="dash-card__body">
+      <div class="dash-title-md" id="dv-error-text"></div>
+      <a class="dash-btn dash-btn--secondary" href="request-management.html" style="margin-top:12px;display:inline-block;">Return to Requests</a>
+    </div>
+  </div>
+
+  <section class="dash-grid dash-grid--2" id="dv-content" style="display:none;">
+    <article class="dash-card">
+      <div class="dash-card__body dash-stack-5">
+        <div class="dash-profile-card">
+          <div class="dash-avatar" id="dv-avatar">?</div>
+          <div>
+            <h2 class="dash-title-md" id="dv-donor-name">Loading...</h2>
+            <div class="dash-muted" id="dv-phone-number">...</div>
+          </div>
+        </div>
+        <div class="dash-row-between">
+          <span class="dash-muted">Blood Group</span>
+          <strong id="dv-blood-type">...</strong>
+        </div>
+        <div class="dash-row-between">
+          <span class="dash-muted">Accepted At</span>
+          <strong id="dv-accepted-at">...</strong>
+        </div>
+        <div class="dash-row-between">
+          <span class="dash-muted">Current Status</span>
+          <strong id="dv-status">...</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="dash-card dash-card--soft">
+      <div class="dash-card__body dash-stack-5">
+        <div class="dash-row-between">
+          <h2 class="dash-title-md">Medical Status Update</h2>
+        </div>
+        <p class="dash-muted">
+          Clicking verify will update the donor's medical status on the backend.
+        </p>
+        <div class="dash-card dash-card--alert" style="background:var(--warn-bg,#fffbeb);border-color:var(--warn-border,#fde68a);">
+          <div class="dash-card__body">
+            <h3 class="dash-title-md" style="color:var(--warn-text,#92400e);">System Limitation</h3>
+            <p style="color:var(--warn-text,#92400e);font-size:0.875rem;margin-top:8px;">
+              The backend API requires <code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">DonorUserId</code> to verify a donor (<code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">POST /api/Donors/verify</code>).
+              However, the request details data only provides <code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">AcceptanceId</code> and basic contact info, missing the required user ID.
+            </p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <div class="dash-footer-float" style="display:flex; justify-content:space-between; align-items:center;" id="dv-footer">
+    <div class="dash-toast">
+      <strong>Regulatory Requirement</strong>
+      <p class="dash-muted">Verification must be completed within 30 minutes of donation to ensure unit chain of custody.</p>
+    </div>
+    <button class="dash-btn dash-btn--primary dash-btn--disabled" id="verify-submit-btn" type="button" disabled>Verify & Complete</button>
+  </div>
+</div>
+</main>
+</div>
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  (function () {
+    var user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (!user) {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    if (user.role === 'SystemAdmin') {
+      window.location.replace('../system-admin/dashboard.html');
+      return;
+    }
+    if (user.role !== 'HospitalAdmin' && user.role !== 'HospitalEmployee') {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    // Logout is wired by renderSidebar() in pages.js
+  })();
+</script>
+</body>
+</html>

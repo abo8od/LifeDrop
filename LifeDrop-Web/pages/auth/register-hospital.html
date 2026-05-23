@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hospital Registration - Clinical Curator</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/auth.css" rel="stylesheet"/>
+<link href="../../css/logos.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/><link href="../../css/responsive.css" rel="stylesheet"/></head>
+<body class="light">
+<main class="page registration-shell">
+<div class="container">
+<section class="card registration-box">
+<aside class="registration-sidebar">
+<div>
+<div class="logo logo--clinical">
+<div class="logo__icon-box logo__icon-box--blue">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24">
+<rect class="logo__icon-stroke--white" height="14" rx="2" stroke-width="1.8" width="10" x="5" y="4"></rect>
+<circle class="logo__icon-stroke--white" cx="18" cy="15" r="3.2" stroke-width="1.8"></circle>
+<path class="logo__icon-stroke--white" d="M18 13.6v2.8M16.6 15h2.8" stroke-linecap="round" stroke-width="1.8"></path>
+<circle class="logo__icon-stroke--white" cx="10" cy="8.2" r="1.6" stroke-width="1.5"></circle>
+<path class="logo__icon-stroke--white" d="M7.8 13.4c.7-1.5 1.8-2.2 3.1-2.2s2.4.7 3.1 2.2" stroke-linecap="round" stroke-width="1.5"></path>
+</svg>
+</div>
+<div class="logo__text">
+<span class="logo__title">Clinical Curator</span>
+<span class="logo__subtitle">Blood Management Sys</span>
+</div>
+</div>
+<div class="step-list">
+<div class="step-item active">
+<div class="step-number">1</div>
+<div>
+<h3>Hospital Information</h3>
+<p>Core identification and location data.</p>
+</div>
+</div>
+<div class="step-item">
+<div class="step-number">2</div>
+<div>
+<h3>Upload Documents</h3>
+<p>Verify clinical accreditation.</p>
+</div>
+</div>
+<div class="step-item">
+<div class="step-number">3</div>
+<div>
+<h3>Contact Person</h3>
+<p>Administrator and emergency contacts.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="support-card">
+<h4>Registration Support</h4>
+<p>
+							Need help with the verification process? Contact our clinical
+							onboarding team.
+						</p>
+<a href="#">Open Support Portal</a>
+</div>
+</aside>
+<div class="registration-main">
+<h1 class="registration-title">New Hospital Registration</h1>
+<p class="registration-subtitle">
+						Please provide the necessary credentials to initiate your facility's
+						inclusion in the Global Blood Registry.
+					</p>
+<form class="auth-form">
+<div class="input-group">
+<label class="input-label" for="field-1">Full Hospital Name</label>
+<input class="input" id="field-1" placeholder="e.g. St. Jude Memorial Center" type="text"/>
+</div>
+<div class="form-grid form-grid--2">
+<div class="input-group">
+<label class="input-label" for="field-2">Registration ID</label>
+<input class="input" id="field-2" placeholder="MD-XXXX-XXXX" type="text"/>
+</div>
+<div class="input-group">
+<label class="input-label" for="field-3">Facility Type</label>
+<select class="input" id="field-3">
+<option>Public General Hospital</option>
+<option>Private Hospital</option>
+<option>Medical Center</option>
+</select>
+</div>
+</div>
+<div class="input-group">
+<label class="input-label" for="field-4">Physical Address</label>
+<textarea class="input" id="field-4" placeholder="Enter full facility address."></textarea>
+</div>
+<div class="upload-box">
+<div>
+<div class="upload-icon">
+<img alt="" src="../../assets/icons/upload.svg"/>
+</div>
+<h3>Verify Hospital Credentials</h3>
+<p>
+									In the next step, you will be required to upload your Medical
+									License and ISO Accreditation certificates.
+								</p>
+<div class="upload-tags">
+<span>PDF</span>
+<span>JPG</span>
+<span>MAX 10MB</span>
+</div>
+</div>
+</div>
+<div class="registration-actions">
+<a class="back-link back-link--inline" href="login.html">
+<span class="back-link__icon">
+<img alt="" src="../../assets/icons/arrow-left.svg"/>
+</span>
+<span>Back to Portal</span>
+</a>
+<button class="btn btn-primary btn-with-icon" data-loading-text="Processing..." type="submit">
+<span>Continue to Verification</span>
+<span class="btn-icon">
+<img alt="" src="../../assets/icons/arrow-right.svg"/>
+</span>
+</button>
+</div>
+</form>
+<div class="info-cards">
+<div class="info-card">
+<h4>Global Compliance</h4>
+<p>
+								All registered hospitals must adhere to international blood
+								safety protocols and real-time inventory reporting.
+							</p>
+</div>
+<div class="info-card">
+<h4>Secure Handling</h4>
+<p>
+								Your data is encrypted using clinical-grade standards, ensuring
+								patient and facility confidentiality.
+							</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<script src="../../js/app.js"></script>
+</body>
+</html>

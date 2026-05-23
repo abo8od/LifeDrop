@@ -1,0 +1,130 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo__icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.logo__icon-box--blue {
+  background: var(--brand-blue);
+}
+
+.logo__icon-box--light-blue {
+  background: #a9c8ff;
+}
+
+.logo__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.logo__title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.logo__subtitle {
+  margin-top: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.logo--centered {
+  flex-direction: column;
+  text-align: center;
+  gap: 12px;
+}
+
+.logo--centered .logo__text {
+  align-items: center;
+}
+
+.logo--large .logo__icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+}
+
+.logo--large .logo__title {
+  font-size: 22px;
+}
+
+.logo svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.logo--large svg {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.logo__icon-box img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.logo__icon-stroke--white {
+  stroke: #ffffff;
+}
+
+.logo__icon-stroke--blue {
+  stroke: var(--brand-blue);
+}
+
+.logo__icon-fill--white {
+  fill: #ffffff;
+}
+
+.logo__icon-fill--blue {
+  fill: var(--brand-blue);
+}
+
+.logo--clinical .logo__title,
+.logo--lifedrop .logo__title {
+  color: var(--brand-blue);
+}
+
+body.dark .logo--clinical .logo__title,
+body.dark .logo--lifedrop .logo__title {
+  color: var(--brand-blue-soft);
+}
+
+.logo__img {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.protocol-icon__img {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.password-rules__shield img {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.password-rules__bullet--checked img {
+  width: 18px;
+  height: 18px;
+  display: block;
+}

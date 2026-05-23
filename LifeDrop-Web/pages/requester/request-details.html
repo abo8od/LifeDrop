@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LifeDrop Core</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/>
+<link href="../../css/responsive.css" rel="stylesheet"/>
+</head>
+<body class="light dashboard-body" data-page="request-details">
+<div class="dash-app">
+<aside class="dash-sidebar">
+<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+    <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+    <div class="dash-stack-2" style="gap:2px;">
+      <div class="dash-brand__title">LifeDrop Core</div>
+      <div class="dash-brand__subtitle">Blood Management</div>
+    </div>
+  </div>
+<nav class="dash-nav"></nav>
+<div class="dash-sidebar__footer"><a class="dash-nav__item" href="#" id="sidebar-logout-btn">Logout</a></div>
+</aside>
+<main class="dash-main">
+<header class="dash-topbar"><div class="dash-topbar__group"><div class="dash-search"><span class="dash-search__icon">⌕</span><input placeholder="Search donors or requests..." type="text"/></div><div class="dash-link-alert">Live API mode</div></div><div class="dash-topbar__group"><button class="dash-btn dash-btn--danger" type="button">Emergency</button><div class="dash-user-chip">Admin</div></div></header>
+<div class="dash-content">
+<div id="rd-content"><section class="dash-page-header"><div class="dash-row-between"><div class="dash-stack-3"><span class="dash-badge dash-badge--critical" id="rd-priority">--</span><div><h1 class="dash-title-xl" id="rd-title">Loading...</h1><p class="dash-subtitle" id="rd-subtitle"></p></div></div><div class="dash-actions"><div class="dash-user-chip" id="rd-status">--</div></div></div></section><section class="dash-grid dash-grid--2" style="margin-bottom:24px;"><article class="dash-card"><div class="dash-card__body dash-stack-5"><div class="dash-ring"><div><div class="dash-ring__value" id="rd-progress-value">--</div><div class="dash-muted" id="rd-progress-copy"></div></div></div></div></article><article class="dash-card"><div class="dash-card__body"><h2 class="dash-title-md">Current State</h2><p class="dash-subtitle">Use this page to complete a request and verify what was created from the management screen.</p></div></article></section><section class="dash-card"><div class="dash-card__body"><h2 class="dash-title-md" style="margin-bottom:16px;">Request Activity</h2><div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>Identity</th><th>Blood Type</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody id="rd-donor-table"></tbody></table></div></div></section></div>
+</div></main></div>
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  (function () {
+    var user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (!user) {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    if (user.role === 'SystemAdmin') {
+      window.location.replace('../system-admin/dashboard.html');
+      return;
+    }
+    if (user.role !== 'HospitalAdmin' && user.role !== 'HospitalEmployee') {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    // Logout is wired by renderSidebar() in pages.js
+  })();
+</script>
+</body>
+</html>

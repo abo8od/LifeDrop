@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings &amp; Profile - LifeDrop Core</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/><link href="../../css/responsive.css" rel="stylesheet"/></head>
+<body class="light dashboard-body" data-page="settings-profile">
+<div class="dash-app">
+<aside class="dash-sidebar">
+<div class="dash-stack-2">
+<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+  <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+  <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-brand__title">LifeDrop Core</div>
+    <div class="dash-brand__subtitle">Blood Management</div>
+  </div>
+</div>
+</div>
+<nav class="dash-nav"></nav>
+<div class="dash-sidebar__footer"><a class="dash-nav__item" href="#" id="sidebar-logout-btn">Logout</a></div>
+</aside>
+<main class="dash-main">
+<header class="dash-topbar">
+<div class="dash-topbar__group">
+<div class="dash-search">
+<span class="dash-search__icon">⌕</span>
+<input placeholder="Search donors or requests..." type="text"/>
+</div>
+<div class="dash-link-alert">Emergency Alert</div>
+</div>
+<div class="dash-topbar__group">
+<button class="dash-btn dash-btn--danger" type="button">Emergency</button>
+<button aria-label="Action button" class="dash-icon-btn" type="button">🔔</button>
+<button aria-label="Action button" class="dash-icon-btn" type="button">◎</button>
+<div class="dash-user-chip">Admin</div>
+</div>
+</header>
+<div class="dash-content">
+<section class="dash-page-header">
+<div class="dash-stack-4">
+<div class="dash-row">
+<span class="dash-badge dash-badge--normal">Profile</span>
+<span class="dash-muted">Hospital Profile</span>
+<span class="dash-muted">Staff Management</span>
+</div>
+<div>
+<h1 class="dash-title-lg" id="sp-hospital-name">Hospital Profile</h1>
+<p class="dash-subtitle">View your hospital's system profile and manage staff.</p>
+</div>
+</div>
+</section>
+<section class="dash-grid dash-layout-aside u-inline-83">
+<div class="dash-grid" style="grid-column: 1 / -1; max-width: 800px;">
+<article class="dash-card"><div class="dash-card__body dash-stack-6">
+<div class="dash-profile-card">
+<div class="dash-avatar" id="sp-avatar">H</div>
+<div>
+<h2 class="dash-title-md" id="sp-user-name">Loading User...</h2>
+<div class="dash-muted" id="sp-user-role">Hospital Admin</div>
+</div>
+</div>
+<div class="dash-form-grid dash-form-grid--2">
+<div class="dash-field"><label class="dash-label" id="label-field-1" for="field-1">Hospital Name</label><input class="dash-input" id="field-1" value="" readonly disabled style="background: var(--bg-alt);"/></div>
+<div class="dash-field"><label class="dash-label" for="field-address">Address</label><input class="dash-input" id="field-address" value="" readonly disabled style="background: var(--bg-alt);"/></div>
+<div class="dash-field"><label class="dash-label" id="label-field-2" for="field-2">Latitude</label><input class="dash-input" id="field-2" value="" readonly disabled style="background: var(--bg-alt);"/></div>
+<div class="dash-field"><label class="dash-label" id="label-field-3" for="field-3">Longitude</label><input class="dash-input" id="field-3" value="" readonly disabled style="background: var(--bg-alt);"/></div>
+</div>
+<div class="dash-card dash-card--alert" style="background:var(--warn-bg,#fffbeb);border-color:var(--warn-border,#fde68a);margin-top:16px;">
+  <div class="dash-card__body">
+    <h3 class="dash-title-md" style="color:var(--warn-text,#92400e);">Backend / UI Mismatch</h3>
+    <p style="color:var(--warn-text,#92400e);font-size:0.875rem;margin-top:8px;">
+      The backend <code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">PUT /api/Hospitals/profile</code> endpoint allows updating Name, Address, Latitude, and Longitude. However, the UI design specification locks these fields as read-only.
+    </p>
+  </div>
+</div>
+</div></article>
+<article class="dash-card"><div class="dash-card__body dash-stack-5">
+<div class="dash-row-between">
+<h2 class="dash-title-md">Staff &amp; Permissions</h2>
+<a class="dash-btn dash-btn--secondary dash-btn--xs" href="../hospital-admin/employee-onboarding.html">+ Add New Member</a>
+</div>
+<div class="dash-table-wrap">
+<table class="dash-table">
+<thead><tr><th>Member</th><th>Access Level</th><th>Status</th><th></th></tr></thead>
+<tbody id="staff-list-tbody">
+  <tr>
+    <td colspan="4" class="dash-muted" style="text-align: center; padding: 32px 16px;">
+      Staff listing not supported by backend yet.
+    </td>
+  </tr>
+</tbody>
+</table>
+</div>
+</div></article>
+</div>
+</section>
+</div>
+</main>
+</div>
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  (function () {
+    var user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (!user) {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    // Only HospitalAdmin can access this page
+    if (user.role !== 'HospitalAdmin') {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    // Logout is wired by renderSidebar() in pages.js
+  })();
+</script>
+</body>
+</html>

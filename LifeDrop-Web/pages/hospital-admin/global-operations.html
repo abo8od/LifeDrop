@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Dashboard | LifeDrop Core</title>
+
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/>
+<link href="../../css/responsive.css" rel="stylesheet"/>
+</head>
+
+<body class="light dashboard-body" data-page="global-operations">
+<div class="dash-app dash-app--admin">
+
+<aside class="dash-sidebar dash-sidebar--admin">
+  <div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+    <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+    <div>
+      <div class="dash-brand__title">LifeDrop Core</div>
+      <div class="dash-brand-card__eyebrow">System Admin Portal</div>
+    </div>
+  </div>
+
+  <nav class="dash-nav">
+    <a class="dash-nav__item dash-nav__item--admin is-active" href="global-operations.html">Dashboard</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="hospital-management.html">Hospital Management</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="audit-logs.html">Audit Logs</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="global-settings.html">Global Settings</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="employee-onboarding.html">User Management</a>
+  </nav>
+
+  <div class="dash-session-card dash-session-card--footer">
+    <div class="dash-session-card__avatar" id="go-user-avatar">SA</div>
+    <div>
+      <strong>System Admin</strong>
+      <div class="dash-muted" id="go-user-email">—</div>
+    </div>
+  </div>
+</aside>
+
+<main class="dash-main">
+<header class="dash-topbar">
+  <div class="dash-search dash-admin-search">
+    <span class="dash-search__icon">⌕</span>
+    <input placeholder="System admin view..." type="text"/>
+  </div>
+  <div class="dash-admin-toolbar">
+    <button class="dash-btn dash-btn--secondary" id="go-logout-btn" type="button">Logout</button>
+    <div class="dash-user-chip dash-user-chip--brand">SystemAdmin</div>
+  </div>
+</header>
+
+<div class="dash-content">
+
+<section class="dash-page-header">
+  <div class="dash-stack-2">
+    <h1 class="dash-title-hero">Global Operations</h1>
+    <p class="dash-subtitle">Live system stats from <code>GET /api/Admin/operations</code>.</p>
+  </div>
+</section>
+
+<!-- Stats grid — filled by initGlobalOperations() in pages.js -->
+<section class="dash-grid dash-grid--4" style="margin-bottom:24px;" id="global-operations-root">
+  <article class="dash-card">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Total Donors</div>
+      <div class="dash-stat-card__value" id="go-donors">--</div>
+    </div>
+  </article>
+  <article class="dash-card">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Total Hospitals</div>
+      <div class="dash-stat-card__value" id="go-hospitals">--</div>
+    </div>
+  </article>
+  <article class="dash-card dash-card--alert">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Critical Requests</div>
+      <div class="dash-stat-card__value" id="go-critical">--</div>
+    </div>
+  </article>
+  <article class="dash-card">
+    <div class="dash-card__body">
+      <div class="dash-eyebrow">Response Rate</div>
+      <div class="dash-stat-card__value" id="go-response">--</div>
+    </div>
+  </article>
+</section>
+
+<!-- Activity feed + regions — filled by initGlobalOperations() -->
+<section class="dash-grid dash-layout-aside">
+  <article class="dash-card">
+    <div class="dash-card__body dash-stack-5">
+      <div>
+        <h2 class="dash-title-md">Live Activity Feed</h2>
+        <div class="dash-muted">From <code>/api/Admin/operations</code> → <code>feed</code></div>
+      </div>
+      <div class="dash-feed-list" id="go-feed"></div>
+    </div>
+  </article>
+  <aside class="dash-card">
+    <div class="dash-card__body dash-stack-5">
+      <h2 class="dash-title-md">Active Regions</h2>
+      <div id="go-regions" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    </div>
+  </aside>
+</section>
+
+</div><!-- /.dash-content -->
+</main>
+</div><!-- /.dash-app -->
+
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  // Populate user email in sidebar from JWT
+  document.addEventListener('DOMContentLoaded', function () {
+    var user = window.LifeDropApi && LifeDropApi.getCurrentUser();
+    if (user && user.email) {
+      var el = document.getElementById('go-user-email');
+      if (el) el.textContent = user.email;
+    }
+    var logoutBtn = document.getElementById('go-logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        LifeDropApi.clearTokens();
+        window.location.href = '../../pages/auth/login.html';
+      });
+    }
+  });
+</script>
+</body>
+</html>

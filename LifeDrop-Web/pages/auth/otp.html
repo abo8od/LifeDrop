@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Verification - Clinical Curator</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/auth.css" rel="stylesheet"/>
+<link href="../../css/logos.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/><link href="../../css/responsive.css" rel="stylesheet"/></head>
+<body class="light">
+<main class="page center-shell otp-page">
+<div class="logo logo--clinical logo--centered logo--large">
+<div class="logo__icon-box logo__icon-box--blue">
+<img alt="" src="../../assets/icons/Protocol-Verified.svg"/>
+</div>
+<div class="logo__text">
+<span class="logo__title">Clinical Curator</span>
+<span class="logo__subtitle">Blood Management Sys</span>
+</div>
+</div>
+<section class="card center-card otp-card auth-card--compact">
+<h1 class="form-title">Security Verification</h1>
+<p class="form-subtitle otp-subtitle">
+				Enter the code sent to <strong>administrator@hospital.org</strong>.
+			</p>
+<div class="otp-grid">
+<input class="otp-input" maxlength="1" type="text"/>
+<input class="otp-input" maxlength="1" type="text"/>
+<input class="otp-input" maxlength="1" type="text"/>
+<input class="otp-input" maxlength="1" type="text"/>
+</div>
+<button class="btn btn-primary btn-with-icon" data-loading-text="Processing..." type="button">
+<span>Verify</span>
+<span class="btn-icon">
+<img alt="" src="../../assets/icons/arrow-right.svg"/>
+</span>
+</button>
+<div class="auth-meta-row">
+				Didn't receive a code?
+				<a href="#">Resend Code</a>
+</div>
+</section>
+<div class="auth-meta">
+<span>● Encrypted Session</span>
+<span>|</span>
+<span>● Clinical Auth 2.0</span>
+</div>
+</main>
+<script src="../../js/app.js"></script>
+</body>
+</html>

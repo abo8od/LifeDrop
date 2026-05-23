@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LifeDrop Core</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/>
+<link href="../../css/responsive.css" rel="stylesheet"/>
+</head>
+<body class="light dashboard-body" data-page="dashboard-overview">
+<div class="dash-app">
+<aside class="dash-sidebar">
+<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+    <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+    <div class="dash-stack-2" style="gap:2px;">
+      <div class="dash-brand__title">LifeDrop Core</div>
+      <div class="dash-brand__subtitle">Blood Management</div>
+    </div>
+  </div>
+<nav class="dash-nav"></nav>
+<div class="dash-sidebar__footer"><a class="dash-nav__item" href="#" id="sidebar-logout-btn">Logout</a></div>
+</aside>
+<main class="dash-main">
+<header class="dash-topbar">
+  <div class="dash-topbar__group">
+    <div class="dash-search"><span class="dash-search__icon">⌕</span><input placeholder="Search requests..." type="text"/></div>
+    <div class="dash-link-alert">Live API mode</div>
+  </div>
+  <div class="dash-topbar__group">
+    <!-- Emergency button hidden — TODO: wire to Critical request flow -->
+    <button class="dash-btn dash-btn--danger" type="button" style="display:none;">Emergency</button>
+    <div class="dash-user-chip">Admin</div>
+  </div>
+</header>
+<div class="dash-content">
+
+  <section class="dash-page-header">
+    <div class="dash-row-between">
+      <div class="dash-stack-2">
+        <h1 class="dash-title-xl">Overview Dashboard</h1>
+        <p class="dash-subtitle">Live data from your hospital's donation requests.</p>
+      </div>
+      <div class="dash-actions">
+        <a class="dash-btn dash-btn--primary" href="request-management.html?new=1">+ New Request</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stat cards — all backed by real DashboardOverviewDto fields -->
+  <section class="dash-grid dash-grid--4" style="margin-bottom:24px;">
+    <article class="dash-card dash-stat-card dash-stat-card--critical">
+      <div class="dash-card__body">
+        <div class="dash-eyebrow">Active</div>
+        <div class="dash-stat-card__value" id="ov-active">--</div>
+        <p class="dash-subtitle">Active donation requests.</p>
+      </div>
+    </article>
+    <article class="dash-card dash-stat-card">
+      <div class="dash-card__body">
+        <div class="dash-eyebrow">Fulfilled</div>
+        <div class="dash-stat-card__value" id="ov-fulfilled">--</div>
+        <p class="dash-subtitle">Requests fully fulfilled.</p>
+      </div>
+    </article>
+    <article class="dash-card dash-stat-card">
+      <div class="dash-card__body">
+        <div class="dash-eyebrow">Completion Rate</div>
+        <div class="dash-stat-card__value" id="ov-completion">--</div>
+        <p class="dash-subtitle">% of all requests fulfilled.</p>
+      </div>
+    </article>
+    <article class="dash-card dash-stat-card">
+      <div class="dash-card__body">
+        <div class="dash-eyebrow">Blood Bags Collected</div>
+        <div class="dash-stat-card__value" id="ov-bags">--</div>
+        <p class="dash-subtitle">Total units collected across requests.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- Main feed area -->
+  <section class="dash-grid dash-layout-aside" id="overview-feed-wrap">
+    <article class="dash-card">
+      <div class="dash-card__body dash-stack-5">
+        <div>
+          <h2 class="dash-title-md">Recent Activity</h2>
+          <div class="dash-muted">Latest request and fulfillment events</div>
+        </div>
+        <div class="dash-feed-list" id="overview-feed"></div>
+      </div>
+    </article>
+    <aside class="dash-card">
+      <div class="dash-card__body dash-stack-5">
+        <h2 class="dash-title-md">Active Request Progress</h2>
+        <div class="dash-muted" style="font-size:0.8em;">Top 5 active requests</div>
+        <div class="dash-feed-list" id="ov-progress-list"></div>
+        <a class="dash-btn dash-btn--secondary" href="request-management.html" style="margin-top:8px; display:flex; align-items:center; justify-content:center; text-align:center;">View All Requests</a>
+      </div>
+    </aside>
+  </section>
+
+  <!-- Employee Management Placeholder (HospitalAdmin Only) -->
+  <section class="dash-card" id="ha-employee-placeholder" style="display: none; margin-top: 24px;">
+    <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div class="dash-stack-2" style="gap:2px;">
+        <h2 class="dash-title-md">Employee Management</h2>
+        <p class="dash-subtitle">Manage hospital employees and their access.</p>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <div class="dash-search"><span class="dash-search__icon">⌕</span><input id="emp-search" placeholder="Search employees..." type="text"/></div>
+        <button class="dash-btn dash-btn--secondary dash-btn--xs" disabled title="Requires backend endpoint">Activate</button>
+        <button class="dash-btn dash-btn--danger dash-btn--xs" disabled title="Requires backend endpoint">Deactivate</button>
+      </div>
+    </div>
+    <div class="dash-table-wrap" id="emp-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Role</th>
+            <th>Active Status</th>
+            <th>Created On</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="emp-table-body">
+          <tr>
+            <td colspan="7" class="dash-muted" style="text-align: center; padding: 24px;">Loading employees...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <div class="dash-muted" id="emp-page-indicator" style="font-size: 0.85em;">Page 1</div>
+      <div style="display: flex; gap: 8px;">
+        <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-prev-btn" disabled>Previous</button>
+        <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-next-btn" disabled>Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Employee Details Modal -->
+  <dialog id="emp-details-modal" class="dash-card" style="padding: 0; border: 1px solid var(--border); border-radius: 12px; min-width: 400px; max-width: 90vw; background: var(--bg-card); color: var(--text-base);">
+    <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <h2 class="dash-title-md">Employee Details</h2>
+      <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-modal-close" style="padding: 4px 8px;">✕</button>
+    </div>
+    <div style="padding: 16px;" id="emp-modal-content">
+      Loading...
+    </div>
+  </dialog>
+
+</div></main></div>
+
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  (function () {
+    var user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (!user) {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    if (user.role === 'SystemAdmin') {
+      window.location.replace('../system-admin/dashboard.html');
+      return;
+    }
+    if (user.role !== 'HospitalAdmin' && user.role !== 'HospitalEmployee') {
+      window.location.replace('../../pages/auth/login.html');
+      return;
+    }
+    // Logout is wired by renderSidebar() in pages.js
+  })();
+</script>
+</body>
+</html>
