@@ -180,6 +180,84 @@ body.dark .btn-primary {
 	transition: border-color .2s ease, box-shadow .2s ease;
 }
 
+.password-field-host {
+	position: relative;
+}
+
+.password-field-wrap {
+	position: relative;
+	display: block;
+	width: 100%;
+}
+
+.password-field-input,
+.password-field-host .input,
+.password-field-host .dash-input {
+	padding-right: 48px !important;
+}
+
+.password-toggle-btn {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 34px;
+	height: 34px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background: transparent;
+	color: var(--muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+
+.password-toggle-btn:hover {
+	background: color-mix(in srgb, var(--panel-soft) 78%, transparent 22%);
+	color: var(--text);
+}
+
+.password-toggle-btn:focus-visible {
+	outline: none;
+	border-color: var(--brand-blue);
+	box-shadow: 0 0 0 3px rgba(13, 86, 166, 0.16);
+}
+
+.password-toggle-btn__icon {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 10px;
+	border: 2px solid currentColor;
+	border-radius: 10px / 7px;
+}
+
+.password-toggle-btn__icon::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 4px;
+	height: 4px;
+	border-radius: 999px;
+	background: currentColor;
+	transform: translate(-50%, -50%);
+}
+
+.password-toggle-btn.is-active .password-toggle-btn__icon::before {
+	content: "";
+	position: absolute;
+	left: -2px;
+	top: 3px;
+	width: 18px;
+	height: 2px;
+	background: currentColor;
+	transform: rotate(-28deg);
+}
+
 .input:hover {
 	border-color: color-mix(in srgb, var(--border) 60%, var(--text) 40%);
 }

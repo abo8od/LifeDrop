@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Employee Onboarding | LifeDrop Core</title>
+<title>Employees | LifeDrop Core</title>
 <link href="../../css/theme.css" rel="stylesheet"/>
 <link href="../../css/style.css" rel="stylesheet"/>
 <link href="../../css/theme-controls.css" rel="stylesheet"/>
@@ -25,8 +25,7 @@
   <nav class="dash-nav">
     <a class="dash-nav__item dash-nav__item--admin" href="../requester/dashboard-overview.html">Dashboard</a>
     <a class="dash-nav__item dash-nav__item--admin" href="../requester/request-management.html">Request Management</a>
-    <a class="dash-nav__item dash-nav__item--admin" href="../requester/settings-profile.html">Settings</a>
-    <a class="dash-nav__item dash-nav__item--admin is-active" href="employee-onboarding.html">User Management</a>
+    <a class="dash-nav__item dash-nav__item--admin is-active" href="employee-onboarding.html">Employees</a>
   </nav>
 
   <div class="dash-session-card dash-session-card--footer">
@@ -41,8 +40,7 @@
         <div class="dash-title-hero">Employee</div>
         <div class="dash-title-hero" style="color:var(--muted);">Onboarding</div>
         <p class="dash-subtitle" style="max-width:320px;">
-          Register a new Hospital Employee account for your hospital.
-          Uses <code>POST /api/Hospitals/employee</code> (HospitalAdminOnly).
+          Register a new hospital employee account for your facility.
         </p>
       </div>
       <article class="dash-card">
@@ -70,6 +68,10 @@
               <label class="dash-label" for="staff-email">Email Address</label>
               <input class="dash-input" id="staff-email" required type="email"/>
             </div>
+            <div class="dash-field" id="staff-phone-field" style="display:none;">
+              <label class="dash-label" for="staff-phone">Phone Number</label>
+              <input class="dash-input" id="staff-phone" type="tel"/>
+            </div>
             <div class="dash-field">
               <label class="dash-label" for="staff-password">Password</label>
               <input class="dash-input" id="staff-password" required type="password"/>
@@ -88,6 +90,29 @@
         </div>
       </form>
     </main>
+  </section>
+
+  <section class="dash-card" style="margin-top:24px;">
+    <div class="dash-card__body">
+      <div class="dash-row-between" style="margin-bottom:16px;">
+        <div>
+          <h2 class="dash-title-md">Employee List</h2>
+          <p class="dash-subtitle">Current employee accounts in your hospital.</p>
+          <p class="dash-subtitle" id="staff-activation-note"></p>
+        </div>
+        <button class="dash-btn dash-btn--secondary dash-btn--xs" id="staff-show-all-btn" type="button" style="display:none;">Show all</button>
+      </div>
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th id="staff-phone-header">Phone</th><th>Role</th><th>Status</th></tr>
+          </thead>
+          <tbody id="staff-table-body">
+            <tr><td colspan="5" class="dash-muted" style="text-align:center;padding:24px;">Loading employees...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 </div>
 

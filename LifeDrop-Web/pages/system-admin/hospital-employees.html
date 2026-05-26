@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hospital Employees | LifeDrop Core</title>
+<link href="../../css/theme.css" rel="stylesheet"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+<link href="../../css/theme-controls.css" rel="stylesheet"/>
+<link href="../../css/dashboard.css" rel="stylesheet"/>
+<link href="../../css/utilities.css" rel="stylesheet"/>
+<link href="../../css/responsive.css" rel="stylesheet"/>
+</head>
+<body class="light dashboard-body" data-page="system-admin-hospital-employees">
+<div class="dash-app dash-app--admin">
+<aside class="dash-sidebar dash-sidebar--admin">
+  <div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+    <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
+    <div>
+      <div class="dash-brand__title">LifeDrop Core</div>
+      <div class="dash-brand-card__eyebrow">System Admin Portal</div>
+    </div>
+  </div>
+  <nav class="dash-nav">
+    <a class="dash-nav__item dash-nav__item--admin" href="dashboard.html">Dashboard</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="create-hospital.html">Create Hospital</a>
+    <a class="dash-nav__item dash-nav__item--admin" href="create-hospital-admin.html">Create Admin</a>
+  </nav>
+  <div class="dash-session-card dash-session-card--footer">
+    <a class="dash-nav__item" href="#" id="eo-logout-btn">Logout</a>
+  </div>
+</aside>
+
+<main class="dash-main">
+<header class="dash-topbar">
+  <div class="dash-topbar__group"><div class="dash-link-alert">Admin Console</div></div>
+  <div class="dash-admin-toolbar">
+    <a class="dash-btn dash-btn--secondary" href="dashboard.html">Back to Dashboard</a>
+    <div class="dash-user-chip dash-user-chip--brand">SystemAdmin</div>
+  </div>
+</header>
+
+<div class="dash-content">
+  <section class="dash-page-header">
+    <div class="dash-row-between">
+      <div class="dash-stack-2">
+        <h1 class="dash-title-hero" id="sa-hospital-employees-title">Hospital Employees</h1>
+        <p class="dash-subtitle" id="sa-hospital-employees-subtitle">Loading hospital context...</p>
+      </div>
+      <button class="dash-btn dash-btn--secondary" id="sa-show-all-employees" type="button" style="display:none;">Show all</button>
+    </div>
+  </section>
+
+  <section class="dash-card">
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="sa-hospital-employees-tbody">
+          <tr>
+            <td colspan="5" class="dash-muted" style="text-align:center;padding:24px;">Loading employees...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</main>
+</div>
+
+<script src="../../js/app.js"></script>
+<script src="../../js/api.js"></script>
+<script src="../../js/pages.js"></script>
+<script>
+  (function () {
+    var user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (!user || user.role !== 'SystemAdmin') {
+      window.location.replace('../auth/login.html');
+      return;
+    }
+  })();
+  var logoutBtn = document.getElementById('eo-logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      LifeDropApi.clearTokens();
+      window.location.href = '../auth/login.html';
+    });
+  }
+</script>
+</body>
+</html>

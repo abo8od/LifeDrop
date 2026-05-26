@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -9,7 +8,9 @@
 <link href="../../css/style.css" rel="stylesheet"/>
 <link href="../../css/theme-controls.css" rel="stylesheet"/>
 <link href="../../css/dashboard.css" rel="stylesheet"/>
-<link href="../../css/utilities.css" rel="stylesheet"/><link href="../../css/responsive.css" rel="stylesheet"/></head>
+<link href="../../css/utilities.css" rel="stylesheet"/>
+<link href="../../css/responsive.css" rel="stylesheet"/>
+</head>
 <body class="light dashboard-body" data-page="donor-verification">
 <div class="dash-app">
 <aside class="dash-sidebar">
@@ -27,19 +28,8 @@
 </aside>
 <main class="dash-main">
 <header class="dash-topbar">
-<div class="dash-topbar__group">
-<div class="dash-search">
-<span class="dash-search__icon">⌕</span>
-<input placeholder="Search donors or requests..." type="text"/>
-</div>
-<div class="dash-link-alert">Emergency Alert</div>
-</div>
-<div class="dash-topbar__group">
-<button class="dash-btn dash-btn--danger" type="button">Emergency</button>
-<button aria-label="Action button" class="dash-icon-btn" type="button">🔔</button>
-<button aria-label="Action button" class="dash-icon-btn" type="button">◎</button>
-<div class="dash-user-chip">Admin</div>
-</div>
+<div class="dash-topbar__group"><div class="dash-link-alert">Live Updates</div></div>
+<div class="dash-topbar__group"><div class="dash-user-chip">Admin</div></div>
 </header>
 <div class="dash-content" id="dv-wrap">
   <section class="dash-page-header">
@@ -96,14 +86,13 @@
           <h2 class="dash-title-md">Medical Status Update</h2>
         </div>
         <p class="dash-muted">
-          Clicking verify will update the donor's medical status on the backend.
+          Verification will become available as soon as the required donor record is available.
         </p>
         <div class="dash-card dash-card--alert" style="background:var(--warn-bg,#fffbeb);border-color:var(--warn-border,#fde68a);">
           <div class="dash-card__body">
-            <h3 class="dash-title-md" style="color:var(--warn-text,#92400e);">System Limitation</h3>
+            <h3 class="dash-title-md" style="color:var(--warn-text,#92400e);">Verification Pending</h3>
             <p style="color:var(--warn-text,#92400e);font-size:0.875rem;margin-top:8px;">
-              The backend API requires <code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">DonorUserId</code> to verify a donor (<code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">POST /api/Donors/verify</code>).
-              However, the request details data only provides <code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">AcceptanceId</code> and basic contact info, missing the required user ID.
+              This donor cannot be verified from this record yet. Please return to this screen once full donor details are available.
             </p>
           </div>
         </div>

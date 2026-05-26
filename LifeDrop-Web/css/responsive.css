@@ -165,18 +165,18 @@ body.dark .toast {
   }
 
   .dash-sidebar {
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 0;
     padding: 20px;
   }
 
   .dash-sidebar__footer {
-    margin-top: 0;
+    margin-top: auto;
   }
 
   .dash-nav,
   .dash-sidebar__footer {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .dash-topbar,

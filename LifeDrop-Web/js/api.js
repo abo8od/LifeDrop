@@ -1,6 +1,6 @@
 
 window.LifeDropApi = (function () {
-  const BASE_URL = localStorage.getItem("lifedrop-api-base") || "https://localhost:5001/api";
+  const BASE_URL = localStorage.getItem("lifedrop-api-base") || "https://lifedrop-vh2h.onrender.com/api";
 
   // ── JWT Decoder ───────────────────────────────────────────────────────────────
   function decodeJwt(token) {
@@ -134,6 +134,18 @@ window.LifeDropApi = (function () {
     return tokenData;
   }
 
+  function toQuery(params) {
+    const query = new URLSearchParams();
+    Object.keys(params || {}).forEach((key) => {
+      const value = params[key];
+      if (value !== undefined && value !== null && value !== '') {
+        query.set(key, value);
+      }
+    });
+    const value = query.toString();
+    return value ? `?${value}` : '';
+  }
+
   // ── API Functions ─────────────────────────────────────────────────────────────
   return {
     baseUrl: BASE_URL,
@@ -151,7 +163,7 @@ window.LifeDropApi = (function () {
     getDashboardOverview: () => request('/Hospitals/dashboard/overview'),
 
     // Donation Requests
-    getRequests:          () => request('/DonationRequests'),
+    getRequests:          (pageNumber = 1, pageSize = 10, searchTerm = '', status = '') => request(`/DonationRequests${toQuery({ pageNumber, pageSize, searchTerm, status })}`),
     getRequest:           (id) => request(`/DonationRequests/${id}`),
     createRequest:        (payload) => request('/DonationRequests', { method: 'POST', body: JSON.stringify(payload) }),
     cancelDonationRequest: (requestId) => request(`/DonationRequests/${requestId}/cancel`, { method: 'POST' }),
@@ -185,7 +197,7 @@ window.LifeDropApi = (function () {
     deactivateEmployeeAdmin: (employeeProfileId) => request(`/Admin/hospitals/employees/${employeeProfileId}/deactivate`, { method: 'PATCH' }),
 
     // Donor Communication & Verification
-    getDonorCommunication: () => request('/Hospitals/donors/communication'),
+    getDonorCommunication: (pageNumber = 1, pageSize = 10, searchTerm = '') => request(`/Hospitals/donors/communication${toQuery({ pageNumber, pageSize, searchTerm })}`),
     verifyDonor:          (payload) => request('/Donors/verify', { method: 'POST', body: JSON.stringify(payload) }),
 
     // Locations (public — no auth required)

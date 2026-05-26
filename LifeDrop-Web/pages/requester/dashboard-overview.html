@@ -26,15 +26,8 @@
 </aside>
 <main class="dash-main">
 <header class="dash-topbar">
-  <div class="dash-topbar__group">
-    <div class="dash-search"><span class="dash-search__icon">⌕</span><input placeholder="Search requests..." type="text"/></div>
-    <div class="dash-link-alert">Live API mode</div>
-  </div>
-  <div class="dash-topbar__group">
-    <!-- Emergency button hidden — TODO: wire to Critical request flow -->
-    <button class="dash-btn dash-btn--danger" type="button" style="display:none;">Emergency</button>
-    <div class="dash-user-chip">Admin</div>
-  </div>
+  <div class="dash-topbar__group"><div class="dash-link-alert">Live Updates</div></div>
+  <div class="dash-topbar__group"><div class="dash-user-chip">Admin</div></div>
 </header>
 <div class="dash-content">
 
@@ -44,18 +37,16 @@
         <h1 class="dash-title-xl">Overview Dashboard</h1>
         <p class="dash-subtitle">Live data from your hospital's donation requests.</p>
       </div>
-      <div class="dash-actions">
-        <a class="dash-btn dash-btn--primary" href="request-management.html?new=1">+ New Request</a>
-      </div>
     </div>
   </section>
 
   <!-- Stat cards — all backed by real DashboardOverviewDto fields -->
-  <section class="dash-grid dash-grid--4" style="margin-bottom:24px;">
+  <section class="dash-grid" style="margin-bottom:24px;grid-template-columns:repeat(5,minmax(0,1fr));">
     <article class="dash-card dash-stat-card dash-stat-card--critical">
       <div class="dash-card__body">
         <div class="dash-eyebrow">Active</div>
         <div class="dash-stat-card__value" id="ov-active">--</div>
+        <div class="dash-stat-indicator"><span id="ov-active-ind"></span></div>
         <p class="dash-subtitle">Active donation requests.</p>
       </div>
     </article>
@@ -63,6 +54,7 @@
       <div class="dash-card__body">
         <div class="dash-eyebrow">Fulfilled</div>
         <div class="dash-stat-card__value" id="ov-fulfilled">--</div>
+        <div class="dash-stat-indicator"><span id="ov-fulfilled-ind"></span></div>
         <p class="dash-subtitle">Requests fully fulfilled.</p>
       </div>
     </article>
@@ -70,37 +62,101 @@
       <div class="dash-card__body">
         <div class="dash-eyebrow">Completion Rate</div>
         <div class="dash-stat-card__value" id="ov-completion">--</div>
+        <div class="dash-stat-indicator"><span id="ov-completion-ind"></span></div>
         <p class="dash-subtitle">% of all requests fulfilled.</p>
+      </div>
+    </article>
+    <article class="dash-card dash-stat-card">
+      <div class="dash-card__body">
+        <div class="dash-eyebrow">Canceled</div>
+        <div class="dash-stat-card__value" id="ov-cancelled">--</div>
+        <div class="dash-stat-indicator"><span id="ov-cancelled-ind"></span></div>
+        <p class="dash-subtitle">Requests canceled.</p>
       </div>
     </article>
     <article class="dash-card dash-stat-card">
       <div class="dash-card__body">
         <div class="dash-eyebrow">Blood Bags Collected</div>
         <div class="dash-stat-card__value" id="ov-bags">--</div>
+        <div class="dash-stat-indicator"><span id="ov-bags-ind"></span></div>
         <p class="dash-subtitle">Total units collected across requests.</p>
       </div>
     </article>
   </section>
 
-  <!-- Main feed area -->
-  <section class="dash-grid dash-layout-aside" id="overview-feed-wrap">
+  <section class="dash-grid dash-layout-aside" style="margin-bottom:24px;" id="overview-feed-wrap">
     <article class="dash-card">
-      <div class="dash-card__body dash-stack-5">
-        <div>
-          <h2 class="dash-title-md">Recent Activity</h2>
-          <div class="dash-muted">Latest request and fulfillment events</div>
+      <div class="dash-card__body">
+        <div class="dash-row-between" style="margin-bottom:24px;">
+          <div>
+            <div class="dash-eyebrow">Monthly Trend</div>
+            <h2 class="dash-title-md">Donations by Month</h2>
+          </div>
+          <span class="dash-badge dash-badge--normal">API Data</span>
         </div>
-        <div class="dash-feed-list" id="overview-feed"></div>
+        <div class="dash-chart-canvas-wrap" id="ov-chart-bars">
+          <canvas id="ov-monthly-chart" aria-label="Monthly donation trend chart"></canvas>
+        </div>
       </div>
     </article>
     <aside class="dash-card">
       <div class="dash-card__body dash-stack-5">
-        <h2 class="dash-title-md">Active Request Progress</h2>
-        <div class="dash-muted" style="font-size:0.8em;">Top 5 active requests</div>
-        <div class="dash-feed-list" id="ov-progress-list"></div>
-        <a class="dash-btn dash-btn--secondary" href="request-management.html" style="margin-top:8px; display:flex; align-items:center; justify-content:center; text-align:center;">View All Requests</a>
+        <h2 class="dash-title-md">Blood Type Mix</h2>
+        <div class="dash-chart-canvas-wrap dash-chart-canvas-wrap--compact" id="ov-blood-mix">
+          <canvas id="ov-blood-chart" aria-label="Blood type mix chart"></canvas>
+        </div>
+        <div class="dash-metric-list dash-metric-list--compact" id="ov-blood-mix-legend"></div>
       </div>
     </aside>
+  </section>
+
+  <section class="dash-grid dash-grid--2" style="margin-bottom:24px;">
+    <article class="dash-card">
+      <div class="dash-card__body">
+        <div class="dash-row-between" style="margin-bottom:12px;">
+          <h2 class="dash-title-md">Request Status Overview</h2>
+          <span class="dash-badge dash-badge--normal">Dashboard API</span>
+        </div>
+        <div class="dash-chart-canvas-wrap dash-chart-canvas-wrap--compact" id="ov-status-wrap">
+          <canvas id="ov-status-chart" aria-label="Request status overview chart"></canvas>
+        </div>
+      </div>
+    </article>
+    <article class="dash-card">
+      <div class="dash-card__body">
+        <div class="dash-row-between" style="margin-bottom:12px;">
+          <h2 class="dash-title-md">Completion Gauge</h2>
+          <span class="dash-badge dash-badge--normal">Dashboard API</span>
+        </div>
+        <div class="dash-chart-canvas-wrap dash-chart-canvas-wrap--compact" id="ov-completion-wrap">
+          <canvas id="ov-completion-chart" aria-label="Completion rate gauge chart"></canvas>
+          <div class="dash-gauge-center" id="ov-completion-gauge-label">--%</div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="dash-card" id="overview-requests-wrap">
+    <div style="padding:16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div class="dash-stack-2" style="gap:2px;">
+        <h2 class="dash-title-md">Recent Requests</h2>
+        <p class="dash-subtitle">Latest 5 requests using the Request Management row format.</p>
+      </div>
+      <div class="dash-actions">
+        <a class="dash-btn dash-btn--primary" href="request-management.html?new=1">+ New Request</a>
+        <a class="dash-btn dash-btn--secondary" href="request-management.html">Show all</a>
+      </div>
+    </div>
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr><th>Request ID</th><th>Patient / Unit</th><th>Blood Type</th><th>Priority</th><th>Donor Progress</th><th>Created</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="overview-requests-body">
+          <tr><td colspan="7" class="dash-muted">Loading recent requests...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- Employee Management Placeholder (HospitalAdmin Only) -->
@@ -109,11 +165,11 @@
       <div class="dash-stack-2" style="gap:2px;">
         <h2 class="dash-title-md">Employee Management</h2>
         <p class="dash-subtitle">Manage hospital employees and their access.</p>
+        <p class="dash-subtitle" id="emp-activation-note"></p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <div class="dash-search"><span class="dash-search__icon">⌕</span><input id="emp-search" placeholder="Search employees..." type="text"/></div>
-        <button class="dash-btn dash-btn--secondary dash-btn--xs" disabled title="Requires backend endpoint">Activate</button>
-        <button class="dash-btn dash-btn--danger dash-btn--xs" disabled title="Requires backend endpoint">Deactivate</button>
+        <a class="dash-btn dash-btn--primary dash-btn--xs" href="../hospital-admin/employee-onboarding.html">Add Employee</a>
       </div>
     </div>
     <div class="dash-table-wrap" id="emp-table-wrap">
@@ -122,7 +178,7 @@
           <tr>
             <th>Name</th>
             <th>Email</th>
-            <th>Phone Number</th>
+            <th data-col="phone">Phone Number</th>
             <th>Role</th>
             <th>Active Status</th>
             <th>Created On</th>
@@ -146,12 +202,12 @@
   </section>
 
   <!-- Employee Details Modal -->
-  <dialog id="emp-details-modal" class="dash-card" style="padding: 0; border: 1px solid var(--border); border-radius: 12px; min-width: 400px; max-width: 90vw; background: var(--bg-card); color: var(--text-base);">
-    <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-      <h2 class="dash-title-md">Employee Details</h2>
+  <dialog id="emp-details-modal" class="dash-dialog" aria-labelledby="emp-details-title">
+    <div class="dash-dialog__header">
+      <h2 class="dash-title-md" id="emp-details-title">Employee Details</h2>
       <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-modal-close" style="padding: 4px 8px;">✕</button>
     </div>
-    <div style="padding: 16px;" id="emp-modal-content">
+    <div class="dash-dialog__body" id="emp-modal-content">
       Loading...
     </div>
   </dialog>
@@ -160,6 +216,9 @@
 
 <script src="../../js/app.js"></script>
 <script src="../../js/api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script src="../../js/realtime.js"></script>
 <script src="../../js/pages.js"></script>
 <script>
   (function () {

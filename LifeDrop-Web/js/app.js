@@ -179,7 +179,7 @@
         setLoadingState(submitButton, true);
         window.setTimeout(() => {
           setLoadingState(submitButton, false);
-          showToast("Form passed validation. Connect this to the real backend next.", "success");
+          showToast("Form submitted.", "success");
         }, 900);
       });
     });
@@ -192,7 +192,7 @@
         setLoadingState(button, true);
         window.setTimeout(() => {
           setLoadingState(button, false);
-          showToast("Prototype action completed.", "success");
+          showToast("Action completed.", "success");
         }, 700);
       });
     });
@@ -226,15 +226,95 @@
     });
   }
 
+  function enhancePasswordToggles() {
+    document.querySelectorAll("input[type='password']").forEach((input, index) => {
+      if (!input || input.dataset.passwordToggle === "true") return;
+      input.dataset.passwordToggle = "true";
+
+      const host = input.parentElement;
+      if (!host) return;
+      const wrap = document.createElement("div");
+      wrap.className = "password-field-wrap password-field-host";
+      host.insertBefore(wrap, input);
+      wrap.appendChild(input);
+      input.classList.add("password-field-input");
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "password-toggle-btn";
+      const controlId = input.id || `password-field-${index + 1}`;
+      if (!input.id) input.id = controlId;
+      btn.setAttribute("aria-controls", controlId);
+      btn.setAttribute("aria-label", "Show password");
+      btn.setAttribute("aria-pressed", "false");
+      btn.innerHTML = '<span class="password-toggle-btn__icon" aria-hidden="true"></span>';
+
+      btn.addEventListener("click", function () {
+        const reveal = input.type === "password";
+        input.type = reveal ? "text" : "password";
+        btn.classList.toggle("is-active", reveal);
+        btn.setAttribute("aria-pressed", String(reveal));
+        btn.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
+      });
+
+      wrap.appendChild(btn);
+    });
+  }
+
+  function injectSidebarToggle() {
+    const sidebar = document.querySelector(".dash-sidebar");
+    if (!sidebar || document.querySelector(".dash-sidebar-toggle")) return;
+
+    const toggle = document.createElement("button");
+    toggle.className = "dash-sidebar-toggle";
+    toggle.type = "button";
+    toggle.setAttribute("aria-label", "Open navigation");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.innerHTML = '<span class="dash-sidebar-toggle__icon" aria-hidden="true"></span>';
+    document.body.appendChild(toggle);
+
+    function setSidebarState(open) {
+      document.body.classList.toggle("dash-sidebar-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.classList.toggle("is-open", open);
+      toggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+    }
+
+    toggle.addEventListener("click", function () {
+      const open = !document.body.classList.contains("dash-sidebar-open");
+      setSidebarState(open);
+    });
+
+    document.addEventListener("click", function (event) {
+      if (!document.body.classList.contains("dash-sidebar-open")) return;
+      if (sidebar.contains(event.target) || toggle.contains(event.target)) return;
+      setSidebarState(false);
+    });
+
+    sidebar.addEventListener("click", function (event) {
+      if (!document.body.classList.contains("dash-sidebar-open")) return;
+      const target = event.target.closest("a, button");
+      if (!target) return;
+      if (target.classList.contains("dash-nav__item")) setSidebarState(false);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      if (!document.body.classList.contains("dash-sidebar-open")) return;
+      setSidebarState(false);
+    });
+  }
+
   window.LifeDropUi = { showToast, setLoadingState };
 
   document.addEventListener("DOMContentLoaded", function () {
     injectThemeSwitch();
     applyTheme(savedTheme());
     injectSkipLink();
+    injectSidebarToggle();
+    enhancePasswordToggles();
     bindDemoInteractions();
     bindForms();
     bindButtonActions();
   });
 })();
-

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Employee Onboarding | LifeDrop Core</title>
+<title>Create Hospital Admin | LifeDrop Core</title>
 <link href="../../css/theme.css" rel="stylesheet"/>
 <link href="../../css/style.css" rel="stylesheet"/>
 <link href="../../css/theme-controls.css" rel="stylesheet"/>
@@ -40,15 +40,14 @@
         <div class="dash-title-hero">Create</div>
         <div class="dash-title-hero" style="color:var(--muted);">Admin</div>
         <p class="dash-subtitle" style="max-width:320px;">
-          Register a new Hospital Administrator for a specific hospital.
-          Uses <code>POST /api/Hospitals/admin</code> (SystemAdminOnly).
+          Register a hospital administrator and assign them to a hospital.
         </p>
       </div>
       <article class="dash-card">
         <div class="dash-card__body">
-          <h3 class="dash-title-md" style="margin-bottom:16px;">Result</h3>
+          <h3 class="dash-title-md" style="margin-bottom:16px;">Status</h3>
           <div class="dash-metric-list">
-            <div id="cha-result" class="dash-muted">Waiting for submission...</div>
+            <div id="cha-result" class="dash-muted">Select a hospital and complete admin details.</div>
           </div>
         </div>
       </article>
@@ -78,9 +77,11 @@
               <input class="dash-input" id="ha-password" required type="password"/>
             </div>
             <div class="dash-field" style="grid-column: 1 / -1;">
-              <label class="dash-label" for="ha-hospitalid">Hospital ID (GUID)</label>
-              <input class="dash-input" id="ha-hospitalid" required type="text" placeholder="00000000-0000-0000-0000-000000000000"/>
-              <div class="dash-muted" style="margin-top:4px;">Retrieve this ID from the Create Hospital screen.</div>
+              <label class="dash-label" for="ha-hospitalid">Hospital</label>
+              <select class="dash-input" id="ha-hospitalid" required>
+                <option value="">Loading hospitals...</option>
+              </select>
+              <div class="dash-muted" style="margin-top:4px;">Hospitals load from the System Admin hospital list.</div>
             </div>
           </div>
         </section>

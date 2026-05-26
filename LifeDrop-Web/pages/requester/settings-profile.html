@@ -28,16 +28,10 @@
 <main class="dash-main">
 <header class="dash-topbar">
 <div class="dash-topbar__group">
-<div class="dash-search">
 <span class="dash-search__icon">⌕</span>
-<input placeholder="Search donors or requests..." type="text"/>
-</div>
-<div class="dash-link-alert">Emergency Alert</div>
+<div class="dash-link-alert">Live Updates</div>
 </div>
 <div class="dash-topbar__group">
-<button class="dash-btn dash-btn--danger" type="button">Emergency</button>
-<button aria-label="Action button" class="dash-icon-btn" type="button">🔔</button>
-<button aria-label="Action button" class="dash-icon-btn" type="button">◎</button>
 <div class="dash-user-chip">Admin</div>
 </div>
 </header>
@@ -71,14 +65,6 @@
 <div class="dash-field"><label class="dash-label" id="label-field-2" for="field-2">Latitude</label><input class="dash-input" id="field-2" value="" readonly disabled style="background: var(--bg-alt);"/></div>
 <div class="dash-field"><label class="dash-label" id="label-field-3" for="field-3">Longitude</label><input class="dash-input" id="field-3" value="" readonly disabled style="background: var(--bg-alt);"/></div>
 </div>
-<div class="dash-card dash-card--alert" style="background:var(--warn-bg,#fffbeb);border-color:var(--warn-border,#fde68a);margin-top:16px;">
-  <div class="dash-card__body">
-    <h3 class="dash-title-md" style="color:var(--warn-text,#92400e);">Backend / UI Mismatch</h3>
-    <p style="color:var(--warn-text,#92400e);font-size:0.875rem;margin-top:8px;">
-      The backend <code style="background:rgba(0,0,0,0.1);padding:2px 4px;border-radius:4px;">PUT /api/Hospitals/profile</code> endpoint allows updating Name, Address, Latitude, and Longitude. However, the UI design specification locks these fields as read-only.
-    </p>
-  </div>
-</div>
 </div></article>
 <article class="dash-card"><div class="dash-card__body dash-stack-5">
 <div class="dash-row-between">
@@ -91,7 +77,7 @@
 <tbody id="staff-list-tbody">
   <tr>
     <td colspan="4" class="dash-muted" style="text-align: center; padding: 32px 16px;">
-      Staff listing not supported by backend yet.
+      No staff records available yet.
     </td>
   </tr>
 </tbody>

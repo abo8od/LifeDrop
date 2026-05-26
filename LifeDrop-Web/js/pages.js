@@ -18,7 +18,7 @@
     return 'is-success';
   }
   function showError(targetId, message) {
-    html(targetId, `<div class="dash-card"><div class="dash-card__body"><strong>API connection failed.</strong><p class="dash-subtitle">${message}</p><p class="dash-subtitle">Make sure the ASP.NET API is running on https://localhost:7001.</p></div></div>`);
+    html(targetId, `<div class="dash-card"><div class="dash-card__body"><strong>Could not load this section.</strong><p class="dash-subtitle">${message}</p><p class="dash-subtitle">Please try again in a moment.</p></div></div>`);
   }
 
   // ── Enum label helpers (enums serialised as ints by the backend) ─────────────
@@ -34,14 +34,87 @@
   const BT_VAL  = {'O+':0,'O-':1,'A+':2,'A-':3,'B+':4,'B-':5,'AB+':6,'AB-':7};
   const URG_VAL = {'Normal':0,'Urgent':1,'Critical':2};
 
-  function fmtBT(v)  { return BT[v]  ?? String(v); }
-  function fmtUrg(v) { return URG[v] ?? String(v); }
-  function fmtRSt(v) { return RST[v] ?? String(v); }
-  function fmtASt(v) { return AST[v] ?? String(v); }
+  function normalizeToken(value) {
+    return String(value ?? '').replace(/_/g, '').replace(/\s+/g, '').replace(/-/g, '').toLowerCase();
+  }
+  function fmtBT(v)  { return BT[v]  ?? String(v ?? '--').replace('_Positive', '+').replace('_Negative', '-'); }
+  function fmtUrg(v) { return URG[v] ?? String(v ?? '--'); }
+  function fmtRSt(v) { return RST[v] ?? String(v ?? '--'); }
+  function fmtASt(v) { return AST[v] ?? String(v ?? '--'); }
   function urgClass(v) {
-    if (v === 2) return 'dash-badge--critical';
-    if (v === 1) return 'dash-badge--urgent';
+    const n = normalizeToken(v);
+    if (v === 2 || n === 'critical') return 'dash-badge--critical';
+    if (v === 1 || n === 'urgent') return 'dash-badge--urgent';
     return 'dash-badge--normal';
+  }
+  function statusClass(v) {
+    const n = normalizeToken(v);
+    if (n === 'cancelled' || n === 'canceled' || n === 'expired' || n === 'inactive') return 'dash-badge--critical';
+    if (n === 'fulfilled' || n === 'active') return 'dash-badge--success';
+    return 'dash-badge--normal';
+  }
+  function isActiveStatus(v) { return v === 0 || normalizeToken(v) === 'active'; }
+  function isCriticalUrgency(v) { return v === 2 || normalizeToken(v) === 'critical'; }
+  function requestRow(req) {
+    const pct = Math.min(Math.round(req.fulfillmentPercentage || 0), 100);
+    const id = req.requestId || '';
+    const shortId = id ? `${id.slice(0, 8)}...` : '--';
+    return `
+      <tr>
+        <td class="dash-muted" style="font-size:0.75em;">${shortId}</td>
+        <td><strong>${fmtBT(req.bloodType)}</strong><div class="dash-muted">${fmtRSt(req.status)}</div></td>
+        <td><span class="dash-badge ${urgClass(req.urgency)}">${fmtBT(req.bloodType)}</span></td>
+        <td><span class="dash-badge ${urgClass(req.urgency)}">${fmtUrg(req.urgency)}</span></td>
+        <td><strong>${req.currentFulfilledAcceptances || 0}/${req.targetQuota || 0}</strong>
+          <div class="dash-progress"><div class="dash-progress__bar ${pct < 35 ? 'is-danger' : pct >= 100 ? 'is-success' : ''}" style="width:${pct}%"></div></div>
+        </td>
+        <td>${req.createdAt ? fmtDate(req.createdAt) : '--'}</td>
+        <td><a class="dash-link-alert" href="request-details.html?id=${id}">View</a></td>
+      </tr>`;
+  }
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  function safeRatio(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(100, n));
+  }
+  const chartInstances = {};
+  function destroyChart(key) {
+    if (chartInstances[key]) {
+      chartInstances[key].destroy();
+      chartInstances[key] = null;
+    }
+  }
+  function hasChartJs() {
+    return typeof window.Chart !== 'undefined';
+  }
+  function setIndicator(id, ratio, tone) {
+    const el = q(id);
+    if (!el) return;
+    const width = safeRatio(ratio);
+    el.style.width = `${width}%`;
+    el.className = tone ? `is-${tone}` : '';
+  }
+  function debounce(fn, wait) {
+    let timer = null;
+    return function () {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, arguments), wait);
+    };
+  }
+  function hasHospitalAdminEmployeeActivation() {
+    if (!window.LifeDropApi) return false;
+    const activate = window.LifeDropApi.activateEmployee;
+    const deactivate = window.LifeDropApi.deactivateEmployee;
+    if (typeof activate !== 'function' || typeof deactivate !== 'function') return false;
+    return !/Promise\.reject/.test(String(activate)) && !/Promise\.reject/.test(String(deactivate));
   }
 
   async function initDashboardOverview() {
@@ -50,7 +123,7 @@
     //              completionRate, totalBloodBagsCollected,
     //              activeRequestsProgress[], recentActivities[]
     // NOT in DTO: critical, urgent, activeHospitals, activeDonors
-    try {
+    async function loadOverviewData() {
       const data = await LifeDropApi.getDashboardOverview() || {};
 
       text('ov-active',    fmtNumber(data.activeRequestsCount));
@@ -58,42 +131,191 @@
       text('ov-cancelled', fmtNumber(data.canceledRequestsCount));
       text('ov-completion', `${Number(data.completionRate || 0).toFixed(1)}%`);
       text('ov-bags',      fmtNumber(data.totalBloodBagsCollected));
+      const totalRequestsBase = Number(data.activeRequestsCount || 0) + Number(data.fulfilledRequestsCount || 0) + Number(data.canceledRequestsCount || 0);
+      setIndicator('ov-active-ind', totalRequestsBase > 0 ? (Number(data.activeRequestsCount || 0) / totalRequestsBase) * 100 : 0, 'normal');
+      setIndicator('ov-fulfilled-ind', totalRequestsBase > 0 ? (Number(data.fulfilledRequestsCount || 0) / totalRequestsBase) * 100 : 0, 'success');
+      setIndicator('ov-cancelled-ind', totalRequestsBase > 0 ? (Number(data.canceledRequestsCount || 0) / totalRequestsBase) * 100 : 0, 'danger');
+      setIndicator('ov-completion-ind', safeRatio(Number(data.completionRate || 0)), 'success');
+      setIndicator('ov-bags-ind', safeRatio((Number(data.totalBloodBagsCollected || 0) / Math.max(1, totalRequestsBase)) * 20), 'normal');
 
-      // Active requests progress mini-list
-      const progress = data.activeRequestsProgress || [];
-      html('ov-progress-list', progress.length
-        ? progress.map(r => {
-            const pct = Math.min(Math.round(r.progressPercentage || 0), 100);
-            return `<div style="display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid var(--border); border-radius:12px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                <strong>${r.bloodType}</strong>
-                <a class="dash-link-alert" href="request-details.html?id=${r.requestId}">View</a>
-              </div>
-              <div style="display:flex; flex-direction:column; gap:6px;">
-                <span class="dash-muted" style="font-size:0.85em;">${r.currentFulfilledAcceptances}/${r.targetQuota} units</span>
-                <div class="dash-progress">
-                  <div class="dash-progress__bar ${pct < 35 ? 'is-danger' : pct >= 100 ? 'is-success' : ''}" style="width:${pct}%"></div>
+      const chartAvailable = hasChartJs();
+      const reports = await LifeDropApi.getReports().catch(() => null);
+      const monthlyRaw = reports && Array.isArray(reports.monthlyDonationStats) ? reports.monthlyDonationStats : [];
+      const monthly = monthlyRaw.slice(-6);
+      const monthlyChartHost = q('ov-chart-bars');
+      const monthlyChartCard = monthlyChartHost && monthlyChartHost.closest('article');
+      if (!monthly.length) {
+        destroyChart('ov-monthly');
+        if (monthlyChartHost) monthlyChartHost.innerHTML = '<div class="dash-empty-inline">No monthly trend data available.</div>';
+      } else if (chartAvailable) {
+        if (monthlyChartHost && !q('ov-monthly-chart')) monthlyChartHost.innerHTML = '<canvas id="ov-monthly-chart" aria-label="Monthly donation trend chart"></canvas>';
+        const ctx = q('ov-monthly-chart');
+        if (ctx) {
+          destroyChart('ov-monthly');
+          const labels = monthly.map(m => String(m.month || '--'));
+          const values = monthly.map(m => Number(m.donationCount || 0));
+          chartInstances['ov-monthly'] = new window.Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Donations',
+                data: values,
+                borderRadius: 8,
+                borderSkipped: false,
+                backgroundColor: 'rgba(13, 86, 166, 0.78)',
+                hoverBackgroundColor: 'rgba(13, 86, 166, 0.95)'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: { grid: { display: false }, ticks: { color: '#7c8aa0' } },
+                y: { beginAtZero: true, ticks: { precision: 0, color: '#7c8aa0' }, grid: { color: 'rgba(124,138,160,0.18)' } }
+              },
+              plugins: { legend: { display: false } }
+            }
+          });
+        }
+      } else if (monthlyChartHost) {
+        monthlyChartHost.innerHTML = '<div class="dash-empty-inline">Chart library unavailable.</div>';
+      }
+
+      const mixRaw = reports && Array.isArray(reports.bloodTypeDistribution) ? reports.bloodTypeDistribution : [];
+      const mix = mixRaw.slice(0, 8);
+      const mixHost = q('ov-blood-mix');
+      const mixChartCard = mixHost && mixHost.closest('aside');
+      const legendHost = q('ov-blood-mix-legend');
+      if (!mix.length) {
+        destroyChart('ov-blood');
+        if (mixHost) mixHost.innerHTML = '<div class="dash-empty-inline">No blood type distribution data available.</div>';
+        if (legendHost) legendHost.innerHTML = '';
+      } else if (chartAvailable) {
+        if (mixHost && !q('ov-blood-chart')) mixHost.innerHTML = '<canvas id="ov-blood-chart" aria-label="Blood type mix chart"></canvas>';
+        const ctx = q('ov-blood-chart');
+        if (ctx) {
+          destroyChart('ov-blood');
+          const labels = mix.map(item => fmtBT(item.bloodType));
+          const values = mix.map(item => Number(item.count || 0));
+          const colors = ['#0d56a6', '#5f8fd2', '#1f9d7a', '#c96a14', '#c91726', '#7a57d1', '#0f766e', '#64748b'];
+          chartInstances['ov-blood'] = new window.Chart(ctx, {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 1, borderColor: '#ffffff' }] },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '62%',
+              plugins: { legend: { display: false } }
+            }
+          });
+          if (legendHost) {
+            legendHost.innerHTML = mix.map((item, idx) => {
+              const bloodType = fmtBT(item.bloodType);
+              const count = Number(item.count || 0);
+              const pctValue = Number(item.percentage);
+              return `<div class="dash-metric-item dash-metric-item--chart">
+                <div class="dash-metric-item__top">
+                  <strong><span class="dash-dot-swatch" style="background:${colors[idx % colors.length]}"></span>${escapeHtml(bloodType)}</strong>
+                  <span>${fmtNumber(count)}${Number.isFinite(pctValue) ? ` (${pctValue.toFixed(1)}%)` : ''}</span>
                 </div>
-              </div>
-            </div>`;
-          }).join('')
-        : '<div class="dash-muted">No active requests.</div>'
-      );
+              </div>`;
+            }).join('');
+          }
+        }
+      } else {
+        if (mixHost) mixHost.innerHTML = '<div class="dash-empty-inline">Chart library unavailable.</div>';
+        if (legendHost) legendHost.innerHTML = '';
+      }
 
-      // Recent activity feed
-      const activities = data.recentActivities || [];
-      html('overview-feed', activities.length
-        ? activities.map(item => `
-            <div class="dash-feed-item">
-              <span class="dash-feed-dot ${item.activityType === 'DonationFulfilled' ? 'is-success' : 'is-warning'}"></span>
-              <div>
-                <strong>${item.activityType === 'DonationFulfilled' ? 'Donation Fulfilled' : 'Request Created'}</strong>
-                <div class="dash-muted">${item.description}</div>
-                <div class="dash-admin-title">${fmtDate(item.timestamp)}</div>
-              </div>
-            </div>`).join('')
-        : '<div class="dash-muted">No recent activity.</div>'
-      );
+      const hasMonthlyAnalytics = monthly.length > 0;
+      const hasBloodMixAnalytics = mix.length > 0;
+      const optionalAnalyticsWrap = q('overview-feed-wrap');
+      if (monthlyChartCard) monthlyChartCard.style.display = hasMonthlyAnalytics ? '' : 'none';
+      if (mixChartCard) mixChartCard.style.display = hasBloodMixAnalytics ? '' : 'none';
+      if (optionalAnalyticsWrap) optionalAnalyticsWrap.style.display = (hasMonthlyAnalytics || hasBloodMixAnalytics) ? '' : 'none';
+
+      const statusWrap = q('ov-status-wrap');
+      const statusValues = [
+        Number(data.activeRequestsCount || 0),
+        Number(data.fulfilledRequestsCount || 0),
+        Number(data.canceledRequestsCount || 0)
+      ];
+      const hasStatusData = statusValues.some(v => v > 0);
+      if (!hasStatusData) {
+        destroyChart('ov-status');
+        if (statusWrap) statusWrap.innerHTML = '<div class="dash-empty-inline">No request status data available.</div>';
+      } else if (chartAvailable) {
+        if (statusWrap && !q('ov-status-chart')) statusWrap.innerHTML = '<canvas id="ov-status-chart" aria-label="Request status overview chart"></canvas>';
+        const statusCtx = q('ov-status-chart');
+        if (statusCtx) {
+          destroyChart('ov-status');
+          chartInstances['ov-status'] = new window.Chart(statusCtx, {
+            type: 'pie',
+            data: {
+              labels: ['Active', 'Fulfilled', 'Canceled'],
+              datasets: [{ data: statusValues, backgroundColor: ['#0d56a6', '#1f9d7a', '#c91726'] }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { position: 'bottom' }, tooltip: { enabled: true } }
+            }
+          });
+        }
+      } else if (statusWrap) {
+        statusWrap.innerHTML = '<div class="dash-empty-inline">Chart library unavailable.</div>';
+      }
+
+      const completionWrap = q('ov-completion-wrap');
+      const completionLabel = q('ov-completion-gauge-label');
+      const completionRate = safeRatio(Number(data.completionRate || 0));
+      if (completionLabel) completionLabel.textContent = `${completionRate.toFixed(1)}%`;
+      if (completionRate <= 0 && totalRequestsBase <= 0) {
+        destroyChart('ov-completion');
+        if (completionWrap) completionWrap.innerHTML = '<div class="dash-empty-inline">No completion data available.</div>';
+      } else if (chartAvailable) {
+        if (completionWrap && !q('ov-completion-chart')) {
+          completionWrap.innerHTML = '<canvas id="ov-completion-chart" aria-label="Completion rate gauge chart"></canvas><div class="dash-gauge-center" id="ov-completion-gauge-label"></div>';
+          const rebuiltLabel = q('ov-completion-gauge-label');
+          if (rebuiltLabel) rebuiltLabel.textContent = `${completionRate.toFixed(1)}%`;
+        }
+        const completionCtx = q('ov-completion-chart');
+        if (completionCtx) {
+          destroyChart('ov-completion');
+          chartInstances['ov-completion'] = new window.Chart(completionCtx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Completed', 'Remaining'],
+              datasets: [{
+                data: [completionRate, Math.max(0, 100 - completionRate)],
+                backgroundColor: ['#1f9d7a', 'rgba(124, 138, 160, 0.22)'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '74%',
+              rotation: -90,
+              circumference: 180,
+              plugins: { legend: { display: false }, tooltip: { enabled: true } }
+            }
+          });
+        }
+      } else if (completionWrap) {
+        completionWrap.innerHTML = '<div class="dash-empty-inline">Chart library unavailable.</div>';
+      }
+
+      const recentPaged = await LifeDropApi.getRequests(1, 5).catch(() => null);
+      const recentRequests = (recentPaged && recentPaged.data) || [];
+      html('overview-requests-body', recentRequests.length
+        ? recentRequests.map(requestRow).join('')
+        : '<tr><td colspan="7" class="dash-muted">No recent requests.</td></tr>');
+    }
+
+    try {
+      await loadOverviewData();
     } catch (error) {
       showError('overview-feed-wrap', error.message);
     }
@@ -107,13 +329,53 @@
       }
     }
 
+    if (window.LifeDropRealtime && user && (user.role === 'HospitalAdmin' || user.role === 'HospitalEmployee')) {
+      const refreshDebounced = debounce(async function () {
+        try { await loadOverviewData(); } catch (_) {}
+      }, 500);
+      window.LifeDropRealtime.start();
+      window.LifeDropRealtime.on('DashboardUpdated', function (payload) {
+        if (!payload) return;
+        text('ov-active', fmtNumber(payload.activeRequests));
+        text('ov-fulfilled', fmtNumber(payload.fulfilledRequests));
+        text('ov-cancelled', fmtNumber(payload.canceledRequests));
+        text('ov-completion', `${Number(payload.completionRate || 0).toFixed(1)}%`);
+        text('ov-bags', fmtNumber(payload.totalBags));
+        if (window.LifeDropUi && window.LifeDropUi.showToast) {
+          window.LifeDropUi.showToast('Dashboard updated.', 'success');
+        }
+        refreshDebounced();
+      });
+      window.LifeDropRealtime.on('RequestAccepted', function (payload) {
+        if (window.LifeDropUi && window.LifeDropUi.showToast) {
+          window.LifeDropUi.showToast(`Donor accepted request ${String(payload && payload.requestId || '').slice(0, 8)}...`, 'success');
+        }
+        refreshDebounced();
+      });
+      window.LifeDropRealtime.on('RequestUpdated', function () {
+        if (window.LifeDropUi && window.LifeDropUi.showToast) {
+          window.LifeDropUi.showToast('Request updated.', 'success');
+        }
+        refreshDebounced();
+      });
+      window.LifeDropRealtime.on('AcceptanceUpdated', function () {
+        if (window.LifeDropUi && window.LifeDropUi.showToast) {
+          window.LifeDropUi.showToast('Acceptance status updated.', 'success');
+        }
+        refreshDebounced();
+      });
+    }
+
     function initEmployeeManagement() {
       let currentPage = 1;
       let pageSize = 5;
       let currentSearch = '';
       let searchTimeout = null;
+      let showPhoneColumn = false;
 
       const tbody = q('emp-table-body');
+      const table = tbody ? tbody.closest('table') : null;
+      const phoneHeader = table ? table.querySelector('[data-col="phone"]') : null;
       const searchInput = q('emp-search');
       const prevBtn = q('emp-prev-btn');
       const nextBtn = q('emp-next-btn');
@@ -121,19 +383,51 @@
       const modal = q('emp-details-modal');
       const modalClose = q('emp-modal-close');
       const modalContent = q('emp-modal-content');
+      const activationNote = q('emp-activation-note');
+      const activationAvailable = hasHospitalAdminEmployeeActivation();
 
-      if (modalClose) {
+      if (activationNote) {
+        activationNote.textContent = activationAvailable ? '' : 'Employee activation controls are currently unavailable for hospital administrators.';
+      }
+
+      if (modalClose && modal) {
+        modalClose.setAttribute('type', 'button');
         modalClose.addEventListener('click', () => modal.close());
+      }
+
+      if (modal) {
+        modal.addEventListener('click', function (event) {
+          const rect = modal.getBoundingClientRect();
+          const inside =
+            event.clientX >= rect.left &&
+            event.clientX <= rect.right &&
+            event.clientY >= rect.top &&
+            event.clientY <= rect.bottom;
+          if (!inside) modal.close();
+        });
+      }
+
+      function hasPhoneField(item) {
+        return item && Object.prototype.hasOwnProperty.call(item, 'phoneNumber');
+      }
+
+      function applyPhoneColumnVisibility() {
+        if (phoneHeader) phoneHeader.style.display = showPhoneColumn ? '' : 'none';
+        if (!tbody) return;
+        tbody.querySelectorAll('.emp-phone-cell').forEach(cell => {
+          cell.style.display = showPhoneColumn ? '' : 'none';
+        });
       }
 
       async function loadData() {
         try {
-          if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="dash-muted" style="text-align: center; padding: 24px;">Loading employees...</td></tr>';
+          if (tbody) tbody.innerHTML = `<tr><td colspan="${showPhoneColumn ? 7 : 6}" class="dash-muted" style="text-align: center; padding: 24px;">Loading employees...</td></tr>`;
           
           const response = await LifeDropApi.getEmployees(currentPage, pageSize, currentSearch);
           const items = (response && response.data) || [];
           const totalPages = response ? response.totalPages : 1;
           const pageNum = response ? response.pageNumber : 1;
+          showPhoneColumn = items.some(hasPhoneField);
 
           if (pageIndicator) pageIndicator.textContent = `Page ${pageNum} of ${totalPages || 1}`;
           
@@ -141,7 +435,8 @@
           if (nextBtn) nextBtn.disabled = pageNum >= totalPages;
 
           if (!items.length) {
-            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="dash-muted" style="text-align: center; padding: 24px;">No employees found.</td></tr>';
+            if (tbody) tbody.innerHTML = `<tr><td colspan="${showPhoneColumn ? 7 : 6}" class="dash-muted" style="text-align: center; padding: 24px;">No employees found.</td></tr>`;
+            applyPhoneColumnVisibility();
             return;
           }
 
@@ -149,42 +444,22 @@
             tbody.innerHTML = items.map(emp => {
               const activeClass = emp.isActive ? 'dash-badge--normal' : 'dash-badge--critical';
               const activeLabel = emp.isActive ? 'Active' : 'Inactive';
-              const toggleBtnLabel = emp.isActive ? 'Deactivate' : 'Activate';
-              const toggleBtnClass = emp.isActive ? 'dash-btn--danger' : 'dash-btn--success';
               return `<tr>
                 <td><strong>${emp.firstName} ${emp.lastName}</strong></td>
                 <td>${emp.email}</td>
-                <td>${emp.phoneNumber || '--'}</td>
+                <td class="emp-phone-cell">${emp.phoneNumber || '--'}</td>
                 <td>${emp.role}</td>
                 <td><span class="dash-badge ${activeClass}">${activeLabel}</span></td>
                 <td>${fmtDate(emp.createdOn)}</td>
                 <td style="display:flex; gap:8px;">
                   <button class="dash-btn dash-btn--secondary dash-btn--xs view-emp-btn" data-id="${emp.employeeProfileId}">View</button>
-                  <button class="dash-btn ${toggleBtnClass} dash-btn--xs toggle-emp-btn" data-id="${emp.employeeProfileId}" data-active="${emp.isActive}">${toggleBtnLabel}</button>
                 </td>
               </tr>`;
             }).join('');
+            applyPhoneColumnVisibility();
 
             document.querySelectorAll('.view-emp-btn').forEach(btn => {
               btn.addEventListener('click', () => openDetails(btn.dataset.id));
-            });
-            document.querySelectorAll('.toggle-emp-btn').forEach(btn => {
-              btn.addEventListener('click', async (e) => {
-                const id = e.target.dataset.id;
-                const isActive = e.target.dataset.active === 'true';
-                try {
-                  e.target.disabled = true;
-                  if (isActive) {
-                    await LifeDropApi.deactivateEmployee(id);
-                  } else {
-                    await LifeDropApi.activateEmployee(id);
-                  }
-                  loadData();
-                } catch (error) {
-                  alert(error.message);
-                  e.target.disabled = false;
-                }
-              });
             });
           }
         } catch (error) {
@@ -194,14 +469,18 @@
             else if (displayMsg.includes('403')) displayMsg = 'Forbidden. You do not have access to view employees.';
             else if (displayMsg.includes('404')) displayMsg = 'Employees not found.';
             else if (displayMsg.includes('429')) displayMsg = 'Too many requests. Please try again later.';
-            tbody.innerHTML = `<tr><td colspan="7" class="dash-muted is-danger" style="text-align: center; padding: 24px;">${displayMsg}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${showPhoneColumn ? 7 : 6}" class="dash-muted is-danger" style="text-align: center; padding: 24px;">${displayMsg}</td></tr>`;
+            applyPhoneColumnVisibility();
           }
         }
       }
 
       async function openDetails(id) {
         if (!modal) return;
-        modal.showModal();
+        if (!modal.open) {
+          if (typeof modal.showModal === 'function') modal.showModal();
+          else modal.setAttribute('open', 'open');
+        }
         modalContent.innerHTML = '<div class="dash-muted">Loading details...</div>';
         try {
           const emp = await LifeDropApi.getEmployee(id);
@@ -265,41 +544,30 @@
 
 
   async function initRequestManagement() {
+    const showAllBtn = q('rm-show-all-btn');
+    let showAllRequests = false;
+
     async function loadTable() {
       try {
-        // Response shape: ApiResponse<PagedResponse<HospitalRequestSummaryDto>>
-        // api.js unwraps ApiResponse.data → PagedResponse; items are in PagedResponse.data
         const paged = await LifeDropApi.getRequests();
         const reqs  = (paged && paged.data) || [];
+        const visibleReqs = showAllRequests ? reqs : reqs.slice(0, 5);
 
-        // Stats derived from real fields
-        const activeCount   = reqs.filter(r => r.status === 0).length;           // RequestStatus.Active = 0
-        const criticalCount = reqs.filter(r => r.urgency === 2).length;          // UrgencyLevel.Critical = 2
-        const avgProgress   = reqs.length
-          ? Math.round(reqs.reduce((s, r) => s + (r.fulfillmentPercentage || 0), 0) / reqs.length)
+        const activeCount = reqs.filter(r => isActiveStatus(r.status)).length;
+        const criticalCount = reqs.filter(r => isCriticalUrgency(r.urgency)).length;
+        const avgProgress = reqs.length
+          ? Math.round(reqs.reduce((sum, r) => sum + (r.fulfillmentPercentage || 0), 0) / reqs.length)
           : 0;
         text('rm-active-count', activeCount);
         text('rm-avg-progress', `${avgProgress}%`);
         text('rm-critical-gap', criticalCount);
 
-        if (!reqs.length) {
-          html('requests-table-body', '<tr><td colspan="7" class="dash-muted">No requests found.</td></tr>');
-        } else {
-          html('requests-table-body', reqs.map(req => {
-            const pct = Math.min(req.fulfillmentPercentage || 0, 100);
-            return `
-            <tr>
-              <td class="dash-muted" style="font-size:0.75em;">${req.requestId.slice(0,8)}…</td>
-              <td><strong>${fmtBT(req.bloodType)}</strong><div class="dash-muted">${fmtRSt(req.status)}</div></td>
-              <td><span class="dash-badge ${urgClass(req.urgency)}">${fmtBT(req.bloodType)}</span></td>
-              <td><span class="dash-badge ${urgClass(req.urgency)}">${fmtUrg(req.urgency)}</span></td>
-              <td><strong>${req.currentFulfilledAcceptances}/${req.targetQuota}</strong>
-                <div class="dash-progress"><div class="dash-progress__bar ${pct < 35 ? 'is-danger' : pct >= 100 ? 'is-success' : ''}" style="width:${pct}%"></div></div>
-              </td>
-              <td>${fmtDate(req.createdAt)}</td>
-              <td><a class="dash-link-alert" href="request-details.html?id=${req.requestId}">View</a></td>
-            </tr>`;
-          }).join(''));
+        html('requests-table-body', visibleReqs.length
+          ? visibleReqs.map(requestRow).join('')
+          : '<tr><td colspan="7" class="dash-muted">No requests found.</td></tr>');
+        if (showAllBtn) {
+          showAllBtn.style.display = reqs.length > 5 ? 'inline-flex' : 'none';
+          showAllBtn.textContent = showAllRequests ? 'Show less' : `Show all (${reqs.length})`;
         }
       } catch (error) {
         showError('requests-table-wrap', error.message);
@@ -308,20 +576,42 @@
 
     await loadTable();
 
-    // Auto-open inline form if navigated here with ?new=1 (e.g. from dashboard)
     if (new URLSearchParams(location.search).get('new') === '1') {
       const panel = q('rm-new-request-panel');
       if (panel) panel.setAttribute('open', '');
     }
 
-    // Wire inline new-request form — on success close panel and refresh table
     await initNewRequestForm('rm-new-request-form', async function () {
       const panel = q('rm-new-request-panel');
       if (panel) panel.removeAttribute('open');
       await loadTable();
     });
-  }
 
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', async function () {
+        showAllRequests = !showAllRequests;
+        await loadTable();
+      });
+    }
+
+    const user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (window.LifeDropRealtime && user && (user.role === 'HospitalAdmin' || user.role === 'HospitalEmployee')) {
+      const refreshDebounced = debounce(loadTable, 500);
+      window.LifeDropRealtime.start();
+      window.LifeDropRealtime.on('RequestAccepted', function () {
+        if (window.LifeDropUi && window.LifeDropUi.showToast) window.LifeDropUi.showToast('Donor accepted a request.', 'success');
+        refreshDebounced();
+      });
+      window.LifeDropRealtime.on('RequestUpdated', function () {
+        if (window.LifeDropUi && window.LifeDropUi.showToast) window.LifeDropUi.showToast('Request updated.', 'success');
+        refreshDebounced();
+      });
+      window.LifeDropRealtime.on('AcceptanceUpdated', function () {
+        if (window.LifeDropUi && window.LifeDropUi.showToast) window.LifeDropUi.showToast('Acceptance updated.', 'success');
+        refreshDebounced();
+      });
+    }
+  }
   // ── Shared new-request form logic (used from standalone page AND inline panel) ─
   async function initNewRequestForm(formId, onSuccess) {
     const form = q(formId);
@@ -548,6 +838,30 @@
     } catch (error) {
       showError('rd-content', error.message);
     }
+
+    const user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
+    if (window.LifeDropRealtime && user && (user.role === 'HospitalAdmin' || user.role === 'HospitalEmployee')) {
+      const refreshDebounced = debounce(async function () {
+        try { await loadDetails(); } catch (_) {}
+      }, 400);
+      window.LifeDropRealtime.start();
+      const requestIdLower = String(id).toLowerCase();
+      window.LifeDropRealtime.on('RequestAccepted', function (payload) {
+        if (!payload || String(payload.requestId || '').toLowerCase() !== requestIdLower) return;
+        if (window.LifeDropUi && window.LifeDropUi.showToast) window.LifeDropUi.showToast('Donor accepted this request.', 'success');
+        refreshDebounced();
+      });
+      window.LifeDropRealtime.on('RequestUpdated', function (payload) {
+        if (!payload || String(payload.requestId || '').toLowerCase() !== requestIdLower) return;
+        if (window.LifeDropUi && window.LifeDropUi.showToast) window.LifeDropUi.showToast('This request was updated.', 'success');
+        refreshDebounced();
+      });
+      window.LifeDropRealtime.on('AcceptanceUpdated', function (payload) {
+        if (!payload || String(payload.requestId || '').toLowerCase() !== requestIdLower) return;
+        if (window.LifeDropUi && window.LifeDropUi.showToast) window.LifeDropUi.showToast('Acceptance changed on this request.', 'success');
+        refreshDebounced();
+      });
+    }
   }
 
   async function initReportsAnalytics() {
@@ -616,12 +930,12 @@
 
   function initGlobalSettings() {
     // Backend endpoint does not exist — no /Admin/settings controller implemented.
-    showError('global-settings-root', 'Global Settings: backend endpoint not yet implemented. This page will be enabled once the API is available.');
+    showError('global-settings-root', 'Global settings are currently unavailable.');
   }
 
   function initAuditLogs() {
     // Backend endpoint does not exist — no /AuditLogs controller implemented.
-    showError('audit-root', 'Audit Logs: backend endpoint not yet implemented. This page will be enabled once the API is available.');
+    showError('audit-root', 'Audit logs are currently unavailable.');
     // Disable the filter button to prevent further errors
     const btn = q('audit-filter-btn');
     if (btn) btn.disabled = true;
@@ -650,137 +964,291 @@
       text('sa-hospitals', fmtNumber(data.totalHospitals || 0));
       text('sa-critical', fmtNumber(data.totalDonationRequests || 0));
       text('sa-response', fmtNumber(data.totalBloodBagsCollected || 0));
-      const regions = data.requestsByGovernorate || [];
-      html('sa-feed', '<div class="dash-muted">Activity feed not supported by backend yet.</div>');
-      html('sa-regions', regions.length ? regions.map(r => `
-        <div class="sa-region-row">
-          <div class="sa-region-name" dir="auto">${r.governorateName}</div>
-          <div class="sa-region-meta">Requests: ${r.requestCount}</div>
-        </div>
-      `).join('') : '<div class="dash-muted">No active regions yet.</div>');
+      const donors = Number(data.totalDonors || 0);
+      const hospitalsTotal = Number(data.totalHospitals || 0);
+      const requestsTotal = Number(data.totalDonationRequests || 0);
+      const bagsTotal = Number(data.totalBloodBagsCollected || 0);
+      const maxBase = Math.max(donors, hospitalsTotal, requestsTotal, bagsTotal, 1);
+      setIndicator('sa-donors-ind', (donors / maxBase) * 100, 'normal');
+      setIndicator('sa-hospitals-ind', (hospitalsTotal / maxBase) * 100, 'normal');
+      setIndicator('sa-requests-ind', (requestsTotal / maxBase) * 100, 'danger');
+      setIndicator('sa-bags-ind', (bagsTotal / maxBase) * 100, 'success');
+      const regions = Array.isArray(data.requestsByGovernorate) ? data.requestsByGovernorate : [];
+      const sortedRegions = regions
+        .map(r => ({ governorateName: r.governorateName || '--', requestCount: Number(r.requestCount || 0) }))
+        .sort((a, b) => b.requestCount - a.requestCount);
+      const maxRegionCount = sortedRegions.reduce((max, r) => Math.max(max, r.requestCount), 0);
+      html('sa-regions', sortedRegions.length ? sortedRegions.map((r, idx) => {
+        const barWidth = maxRegionCount > 0 ? safeRatio((r.requestCount / maxRegionCount) * 100) : 0;
+        return `
+          <div class="sa-region-row">
+            <div class="sa-region-head">
+              <div class="sa-region-name" dir="auto">${escapeHtml(r.governorateName)}</div>
+              <div class="sa-region-count">${fmtNumber(r.requestCount)}</div>
+            </div>
+            <div class="sa-region-bar"><span style="width:${barWidth}%;"></span></div>
+            <div class="sa-region-meta">Rank #${idx + 1}</div>
+          </div>
+        `;
+      }).join('') : '<div class="dash-empty-inline">No governorate request data available.</div>');
+
+      const regionsChartWrap = q('sa-regions-chart') ? q('sa-regions-chart').parentElement : null;
+      const regionsChartEl = q('sa-regions-chart');
+      if (hasChartJs() && regionsChartEl) {
+        destroyChart('sa-regions');
+        if (sortedRegions.length) {
+          chartInstances['sa-regions'] = new window.Chart(regionsChartEl, {
+            type: 'bar',
+            data: {
+              labels: sortedRegions.slice(0, 8).map(r => r.governorateName),
+              datasets: [{
+                label: 'Requests',
+                data: sortedRegions.slice(0, 8).map(r => r.requestCount),
+                backgroundColor: 'rgba(13, 86, 166, 0.78)',
+                borderRadius: 8,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { grid: { display: false }, ticks: { color: '#7c8aa0' } },
+                y: { beginAtZero: true, ticks: { precision: 0, color: '#7c8aa0' }, grid: { color: 'rgba(124,138,160,0.18)' } }
+              }
+            }
+          });
+        } else if (regionsChartWrap) {
+          regionsChartWrap.innerHTML = '<div class="dash-empty-inline">No region distribution data available.</div>';
+        }
+      } else if (regionsChartWrap) {
+        regionsChartWrap.innerHTML = '<div class="dash-empty-inline">Chart library unavailable.</div>';
+      }
+
+      const mixChartWrap = q('sa-mix-chart') ? q('sa-mix-chart').parentElement : null;
+      const mixChartEl = q('sa-mix-chart');
+      if (hasChartJs() && mixChartEl) {
+        destroyChart('sa-mix');
+        if (donors || hospitalsTotal || requestsTotal || bagsTotal) {
+          chartInstances['sa-mix'] = new window.Chart(mixChartEl, {
+            type: 'doughnut',
+            data: {
+              labels: ['Donors', 'Hospitals', 'Requests', 'Bags'],
+              datasets: [{
+                data: [donors, hospitalsTotal, requestsTotal, bagsTotal],
+                backgroundColor: ['#0d56a6', '#5f8fd2', '#c91726', '#1f9d7a'],
+                borderColor: '#ffffff',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '64%',
+              plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
+            }
+          });
+        } else if (mixChartWrap) {
+          mixChartWrap.innerHTML = '<div class="dash-empty-inline">No system mix data available.</div>';
+        }
+      } else if (mixChartWrap) {
+        mixChartWrap.innerHTML = '<div class="dash-empty-inline">Chart library unavailable.</div>';
+      }
     } catch (error) {
       showError('sa-dashboard-root', error.message);
     }
 
-    const saHospitalsTbody = document.getElementById('sa-hospitals-tbody');
-    const saEmpModal = document.getElementById('sa-emp-modal');
-    const saEmpModalClose = document.getElementById('sa-emp-modal-close');
-    const saEmpTbody = document.getElementById('sa-emp-tbody');
+    const saHospitalsTbody = q('sa-hospitals-tbody');
+    const showAllBtn = q('sa-show-all-hospitals');
+    let hospitals = [];
+    let showAllHospitals = false;
 
-    if (saEmpModalClose) saEmpModalClose.addEventListener('click', () => saEmpModal.close());
+    function renderAdminHospitals() {
+      if (!saHospitalsTbody) return;
+      if (!hospitals.length) {
+        saHospitalsTbody.innerHTML = '<tr><td colspan="4" class="dash-muted" style="text-align:center;padding:24px;">No hospitals found.</td></tr>';
+        if (showAllBtn) showAllBtn.style.display = 'none';
+        return;
+      }
+
+      const visibleHospitals = showAllHospitals ? hospitals : hospitals.slice(0, 5);
+      saHospitalsTbody.innerHTML = visibleHospitals.map(h => {
+        const activeClass = h.isActive ? 'dash-badge--normal' : 'dash-badge--critical';
+        const activeLabel = h.isActive ? 'Active' : 'Inactive';
+        const toggleBtnLabel = h.isActive ? 'Deactivate' : 'Activate';
+        const toggleBtnClass = h.isActive ? 'dash-btn--danger' : 'dash-btn--success';
+        return `<tr>
+          <td><strong>${h.name}</strong><div class="dash-muted">${h.hospitalId}</div></td>
+          <td>${h.address || '--'}</td>
+          <td><span class="dash-badge ${activeClass}">${activeLabel}</span></td>
+          <td class="dash-table-actions">
+            <a class="dash-btn dash-btn--primary dash-btn--xs" href="create-hospital-admin.html?hospitalId=${encodeURIComponent(h.hospitalId)}">Create Admin</a>
+            <a class="dash-btn dash-btn--secondary dash-btn--xs" href="hospital-employees.html?hospitalId=${h.hospitalId}&name=${encodeURIComponent(h.name || '')}">Employees</a>
+            <button class="dash-btn ${toggleBtnClass} dash-btn--xs sa-toggle-hosp-btn" data-id="${h.hospitalId}" data-active="${h.isActive}">${toggleBtnLabel}</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      if (showAllBtn) {
+        showAllBtn.style.display = hospitals.length > 5 ? 'inline-flex' : 'none';
+        showAllBtn.textContent = showAllHospitals ? 'Show less' : `Show all (${hospitals.length})`;
+      }
+
+      document.querySelectorAll('.sa-toggle-hosp-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const button = e.currentTarget;
+          const id = button.dataset.id;
+          const isActive = button.dataset.active === 'true';
+          try {
+            button.disabled = true;
+            if (isActive) await LifeDropApi.deactivateHospital(id);
+            else await LifeDropApi.activateHospital(id);
+            const updated = hospitals.find(h => h.hospitalId === id);
+            if (updated) updated.isActive = !isActive;
+            renderAdminHospitals();
+          } catch (error) {
+            alert(error.message);
+            button.disabled = false;
+          }
+        });
+      });
+    }
 
     async function loadAdminHospitals() {
       if (!saHospitalsTbody) return;
       try {
-        const hospitals = await LifeDropApi.getHospitals() || [];
-        if (!hospitals.length) {
-          saHospitalsTbody.innerHTML = '<tr><td colspan="4" class="dash-muted" style="text-align: center; padding: 24px;">No hospitals found.</td></tr>';
-          return;
-        }
-
-        saHospitalsTbody.innerHTML = hospitals.map(h => {
-          const activeClass = h.isActive ? 'dash-badge--normal' : 'dash-badge--critical';
-          const activeLabel = h.isActive ? 'Active' : 'Inactive';
-          const toggleBtnLabel = h.isActive ? 'Deactivate' : 'Activate';
-          const toggleBtnClass = h.isActive ? 'dash-btn--danger' : 'dash-btn--success';
-          return `<tr>
-            <td><strong>${h.name}</strong></td>
-            <td>${h.address}</td>
-            <td><span class="dash-badge ${activeClass}">${activeLabel}</span></td>
-            <td style="display:flex; gap:8px;">
-              <button class="dash-btn dash-btn--secondary dash-btn--xs sa-view-emps-btn" data-id="${h.hospitalId}" data-name="${h.name}">Employees</button>
-              <button class="dash-btn ${toggleBtnClass} dash-btn--xs sa-toggle-hosp-btn" data-id="${h.hospitalId}" data-active="${h.isActive}">${toggleBtnLabel}</button>
-            </td>
-          </tr>`;
-        }).join('');
-
-        document.querySelectorAll('.sa-view-emps-btn').forEach(btn => {
-          btn.addEventListener('click', () => openAdminHospitalEmployees(btn.dataset.id, btn.dataset.name));
-        });
-
-        document.querySelectorAll('.sa-toggle-hosp-btn').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            const isActive = e.target.dataset.active === 'true';
-            try {
-              e.target.disabled = true;
-              if (isActive) await LifeDropApi.deactivateHospital(id);
-              else await LifeDropApi.activateHospital(id);
-              loadAdminHospitals();
-            } catch (error) {
-              alert(error.message);
-              e.target.disabled = false;
-            }
-          });
-        });
+        hospitals = await LifeDropApi.getHospitals() || [];
+        renderAdminHospitals();
       } catch (error) {
-        saHospitalsTbody.innerHTML = `<tr><td colspan="4" class="dash-muted is-danger" style="text-align: center; padding: 24px;">Error: ${error.message}</td></tr>`;
+        saHospitalsTbody.innerHTML = `<tr><td colspan="4" class="dash-muted is-danger" style="text-align:center;padding:24px;">Error: ${error.message}</td></tr>`;
       }
     }
 
-    async function openAdminHospitalEmployees(hospitalId, hospitalName) {
-      if (!saEmpModal) return;
-      saEmpModal.showModal();
-      const titleEl = document.getElementById('sa-emp-modal-title');
-      if (titleEl) titleEl.textContent = `${hospitalName} - Employees`;
-      saEmpTbody.innerHTML = '<tr><td colspan="5" class="dash-muted" style="text-align: center; padding: 24px;">Loading employees...</td></tr>';
-      
-      try {
-        const employees = await LifeDropApi.getHospitalEmployeesAdmin(hospitalId) || [];
-        if (!employees.length) {
-          saEmpTbody.innerHTML = '<tr><td colspan="5" class="dash-muted" style="text-align: center; padding: 24px;">No employees found.</td></tr>';
-          return;
-        }
-
-        const renderEmployees = () => {
-          saEmpTbody.innerHTML = employees.map(emp => {
-            const activeClass = emp.isActive ? 'dash-badge--normal' : 'dash-badge--critical';
-            const activeLabel = emp.isActive ? 'Active' : 'Inactive';
-            const toggleBtnLabel = emp.isActive ? 'Deactivate' : 'Activate';
-            const toggleBtnClass = emp.isActive ? 'dash-btn--danger' : 'dash-btn--success';
-            return `<tr>
-              <td><strong>${emp.firstName} ${emp.lastName}</strong></td>
-              <td>${emp.email}</td>
-              <td>${emp.role}</td>
-              <td><span class="dash-badge ${activeClass}">${activeLabel}</span></td>
-              <td style="display:flex; gap:8px;">
-                <button class="dash-btn ${toggleBtnClass} dash-btn--xs sa-toggle-emp-btn" data-id="${emp.employeeProfileId}" data-active="${emp.isActive}">${toggleBtnLabel}</button>
-              </td>
-            </tr>`;
-          }).join('');
-
-          document.querySelectorAll('.sa-toggle-emp-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-              const id = e.target.dataset.id;
-              const isActive = e.target.dataset.active === 'true';
-              try {
-                e.target.disabled = true;
-                if (isActive) await LifeDropApi.deactivateEmployeeAdmin(id);
-                else await LifeDropApi.activateEmployeeAdmin(id);
-                // Update local state and re-render
-                const updatedEmp = employees.find(x => x.employeeProfileId === id);
-                if (updatedEmp) updatedEmp.isActive = !isActive;
-                renderEmployees();
-              } catch (error) {
-                alert(error.message);
-                e.target.disabled = false;
-              }
-            });
-          });
-        };
-        renderEmployees();
-
-      } catch (error) {
-        saEmpTbody.innerHTML = `<tr><td colspan="5" class="dash-muted is-danger" style="text-align: center; padding: 24px;">Error: ${error.message}</td></tr>`;
-      }
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', () => {
+        showAllHospitals = !showAllHospitals;
+        renderAdminHospitals();
+      });
     }
 
     loadAdminHospitals();
   }
 
+  async function initSystemAdminHospitalEmployees() {
+    const params = new URLSearchParams(location.search);
+    const hospitalId = params.get('hospitalId');
+    const hospitalName = params.get('name') || 'Hospital';
+    const tbody = q('sa-hospital-employees-tbody');
+    const titleEl = q('sa-hospital-employees-title');
+    const subtitleEl = q('sa-hospital-employees-subtitle');
+    const showAllBtn = q('sa-show-all-employees');
+    let employees = [];
+    let showAllEmployees = false;
+
+    if (titleEl) titleEl.textContent = `${hospitalName} Employees`;
+    if (subtitleEl) subtitleEl.textContent = hospitalId ? `Hospital ID: ${hospitalId}` : 'Missing hospital ID.';
+
+    if (!hospitalId) {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="dash-muted is-danger" style="text-align:center;padding:24px;">Missing hospitalId in the URL. Return to the dashboard and open employees from a hospital row.</td></tr>';
+      return;
+    }
+
+    function renderEmployees() {
+      if (!tbody) return;
+      if (!employees.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="dash-muted" style="text-align:center;padding:24px;">No employees found.</td></tr>';
+        if (showAllBtn) showAllBtn.style.display = 'none';
+        return;
+      }
+
+      const visibleEmployees = showAllEmployees ? employees : employees.slice(0, 5);
+      tbody.innerHTML = visibleEmployees.map(emp => {
+        const activeClass = emp.isActive ? 'dash-badge--normal' : 'dash-badge--critical';
+        const activeLabel = emp.isActive ? 'Active' : 'Inactive';
+        const toggleBtnLabel = emp.isActive ? 'Deactivate' : 'Activate';
+        const toggleBtnClass = emp.isActive ? 'dash-btn--danger' : 'dash-btn--success';
+        return `<tr>
+          <td><strong>${emp.firstName} ${emp.lastName}</strong></td>
+          <td>${emp.email}</td>
+          <td>${emp.role || '--'}</td>
+          <td><span class="dash-badge ${activeClass}">${activeLabel}</span></td>
+          <td class="dash-table-actions"><button class="dash-btn ${toggleBtnClass} dash-btn--xs sa-toggle-emp-btn" data-id="${emp.employeeProfileId}" data-active="${emp.isActive}">${toggleBtnLabel}</button></td>
+        </tr>`;
+      }).join('');
+
+      document.querySelectorAll('.sa-toggle-emp-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const button = e.currentTarget;
+          const id = button.dataset.id;
+          const isActive = button.dataset.active === 'true';
+          try {
+            button.disabled = true;
+            if (isActive) await LifeDropApi.deactivateEmployeeAdmin(id);
+            else await LifeDropApi.activateEmployeeAdmin(id);
+            const updated = employees.find(x => x.employeeProfileId === id);
+            if (updated) updated.isActive = !isActive;
+            renderEmployees();
+          } catch (error) {
+            alert(error.message);
+            button.disabled = false;
+          }
+        });
+      });
+
+      if (showAllBtn) {
+        showAllBtn.style.display = employees.length > 5 ? 'inline-flex' : 'none';
+        showAllBtn.textContent = showAllEmployees ? 'Show less' : `Show all (${employees.length})`;
+      }
+    }
+
+    try {
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="dash-muted" style="text-align:center;padding:24px;">Loading employees...</td></tr>';
+      employees = await LifeDropApi.getHospitalEmployeesAdmin(hospitalId) || [];
+      renderEmployees();
+    } catch (error) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="dash-muted is-danger" style="text-align:center;padding:24px;">Error: ${error.message}</td></tr>`;
+    }
+
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', function () {
+        showAllEmployees = !showAllEmployees;
+        renderEmployees();
+      });
+    }
+  }
   function initSystemAdminCreateHospital() {
     const form = q('create-hospital-form');
     if (!form) return;
+    const latInput = q('hosp-lat');
+    const lngInput = q('hosp-lng');
+    const mapEl = q('hospital-map');
+    const mapStatus = q('hospital-map-status');
+
+    if (mapEl && window.L) {
+      try {
+        const map = L.map(mapEl).setView([31.9539, 35.9106], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        let marker = null;
+        map.on('click', function (event) {
+          const lat = Number(event.latlng.lat.toFixed(6));
+          const lng = Number(event.latlng.lng.toFixed(6));
+          if (latInput) latInput.value = lat;
+          if (lngInput) lngInput.value = lng;
+          if (marker) marker.setLatLng(event.latlng);
+          else marker = L.marker(event.latlng).addTo(map);
+          if (mapStatus) mapStatus.textContent = `Selected ${lat}, ${lng}`;
+        });
+        if (mapStatus) mapStatus.textContent = 'Click the map to fill latitude and longitude.';
+      } catch (_) {
+        if (mapStatus) mapStatus.textContent = 'Map failed to load. Enter coordinates manually.';
+      }
+    } else if (mapStatus) {
+      mapStatus.textContent = 'Map unavailable. Enter coordinates manually.';
+    }
+
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
       const submit = form.querySelector('button[type="submit"]');
@@ -789,6 +1257,7 @@
       const payload = {
         name: q('hosp-name').value.trim(),
         address: q('hosp-address').value.trim(),
+        phoneNumber: q('hosp-phone').value.trim(),
         latitude: Number(q('hosp-lat').value || 0),
         longitude: Number(q('hosp-lng').value || 0)
       };
@@ -796,8 +1265,10 @@
       try {
         const result = await LifeDropApi.createHospital(payload);
         if (window.LifeDropUi) window.LifeDropUi.showToast('Hospital created successfully.', 'success');
-        html('ch-result', `<div class="dash-card dash-card--success" style="margin-top:16px;padding:16px;"><strong>Created:</strong> ${result.name}<br/><strong>ID:</strong> ${result.hospitalId}</div>`);
-        form.reset();
+        const hospitalId = result && result.hospitalId;
+        window.location.href = hospitalId
+          ? `create-hospital-admin.html?hospitalId=${encodeURIComponent(hospitalId)}`
+          : 'create-hospital-admin.html';
       } catch (error) {
         if (window.LifeDropUi) window.LifeDropUi.showToast(error.message, 'error');
         html('ch-result', `<div class="dash-card dash-card--danger" style="margin-top:16px;padding:16px;">Error: ${error.message}</div>`);
@@ -807,9 +1278,27 @@
     });
   }
 
-  function initSystemAdminCreateHospitalAdmin() {
+  async function initSystemAdminCreateHospitalAdmin() {
     const form = q('create-hospital-admin-form');
     if (!form) return;
+    const hospitalSelect = q('ha-hospitalid');
+    const requestedHospitalId = new URLSearchParams(location.search).get('hospitalId');
+
+    if (hospitalSelect) {
+      try {
+        const hospitals = await LifeDropApi.getHospitals() || [];
+        hospitalSelect.innerHTML = '<option value="">Select hospital</option>' +
+          hospitals.map(h => `<option value="${h.hospitalId}">${h.name} - ${h.address || h.hospitalId}</option>`).join('');
+        if (requestedHospitalId) {
+          const hasRequested = hospitals.some(h => String(h.hospitalId) === String(requestedHospitalId));
+          if (hasRequested) hospitalSelect.value = requestedHospitalId;
+        }
+      } catch (error) {
+        hospitalSelect.innerHTML = '<option value="">Failed to load hospitals</option>';
+        if (window.LifeDropUi) window.LifeDropUi.showToast(error.message, 'error');
+      }
+    }
+
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
       const submit = form.querySelector('button[type="submit"]');
@@ -838,9 +1327,76 @@
   }
 
   async function initEmployeeOnboarding() {
-    // No GET /staff endpoint exists in the backend — staff list panel is intentionally left blank.
     const listEl = q('staff-list');
-    if (listEl) listEl.innerHTML = '<div class="dash-muted" style="padding:8px 0;">Staff list not available — no backend list endpoint.</div>';
+    const tbody = q('staff-table-body');
+    const phoneHeader = q('staff-phone-header');
+    const phoneFieldWrap = q('staff-phone-field');
+    const activationNote = q('staff-activation-note');
+    const showAllBtn = q('staff-show-all-btn');
+    const activationAvailable = hasHospitalAdminEmployeeActivation();
+    let allEmployees = [];
+    let showAllEmployees = false;
+    let supportsPhoneNumber = false;
+
+    function setPhoneUi(visible) {
+      if (phoneHeader) phoneHeader.style.display = visible ? '' : 'none';
+      if (phoneFieldWrap) phoneFieldWrap.style.display = visible ? '' : 'none';
+      if (!tbody) return;
+      tbody.querySelectorAll('.staff-phone-cell').forEach(cell => {
+        cell.style.display = visible ? '' : 'none';
+      });
+    }
+
+    function renderStaffRows() {
+      if (!tbody) return;
+      const visibleEmployees = showAllEmployees ? allEmployees : allEmployees.slice(0, 5);
+      tbody.innerHTML = visibleEmployees.length ? visibleEmployees.map(emp => {
+        const activeClass = emp.isActive ? 'dash-badge--normal' : 'dash-badge--critical';
+        const activeLabel = emp.isActive ? 'Active' : 'Inactive';
+        return `<tr>
+          <td><strong>${emp.firstName} ${emp.lastName}</strong></td>
+          <td>${emp.email}</td>
+          <td class="staff-phone-cell">${emp.phoneNumber || '--'}</td>
+          <td>${emp.role || '--'}</td>
+          <td><span class="dash-badge ${activeClass}">${activeLabel}</span></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="${supportsPhoneNumber ? 5 : 4}" class="dash-muted" style="text-align:center;padding:24px;">No employees found.</td></tr>`;
+      setPhoneUi(supportsPhoneNumber);
+      if (showAllBtn) {
+        showAllBtn.style.display = allEmployees.length > 5 ? 'inline-flex' : 'none';
+        showAllBtn.textContent = showAllEmployees ? 'Show less' : `Show all (${allEmployees.length})`;
+      }
+    }
+
+    async function loadEmployees() {
+      try {
+        const response = await LifeDropApi.getEmployees(1, 50, '');
+        allEmployees = (response && response.data) || [];
+        const totalCount = response && response.totalCount ? response.totalCount : allEmployees.length;
+        supportsPhoneNumber = allEmployees.some(emp => emp && Object.prototype.hasOwnProperty.call(emp, 'phoneNumber'));
+        setPhoneUi(supportsPhoneNumber);
+        if (listEl) {
+          listEl.innerHTML = `<div class="dash-muted" style="padding:8px 0;">${fmtNumber(totalCount)} employees loaded.</div>`;
+        }
+        renderStaffRows();
+      } catch (error) {
+        if (listEl) listEl.innerHTML = `<div class="dash-muted is-danger" style="padding:8px 0;">${error.message}</div>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="${supportsPhoneNumber ? 5 : 4}" class="dash-muted is-danger" style="text-align:center;padding:24px;">${error.message}</td></tr>`;
+        setPhoneUi(supportsPhoneNumber);
+      }
+    }
+
+    await loadEmployees();
+
+    if (activationNote) {
+      activationNote.textContent = activationAvailable ? '' : 'Employee activation controls are currently unavailable for hospital administrators.';
+    }
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', function () {
+        showAllEmployees = !showAllEmployees;
+        renderStaffRows();
+      });
+    }
 
     const form = q('staff-form');
     if (!form) return;
@@ -869,9 +1425,15 @@
           lastName: parts.slice(1).join(' ') || 'Unknown',
           hospitalId: profile.hospitalId
         };
+        if (supportsPhoneNumber) {
+          const phoneInput = q('staff-phone');
+          const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+          if (phoneNumber) payload.phoneNumber = phoneNumber;
+        }
         await LifeDropApi.createStaff(payload);
         if (window.LifeDropUi) window.LifeDropUi.showToast('Employee account created successfully.', 'success');
         form.reset();
+        await loadEmployees();
       } catch (error) {
         if (window.LifeDropUi) window.LifeDropUi.showToast(error.message, 'error');
       } finally {
@@ -879,7 +1441,6 @@
       }
     });
   }
-
   async function initDonorCommunication() {
     try {
       const data = await LifeDropApi.getDonorCommunication();
@@ -943,7 +1504,7 @@
       if (btn) {
         btn.disabled = true;
         btn.classList.add('dash-btn--disabled');
-        btn.title = 'Cannot verify: DonorUserId missing from API';
+        btn.title = 'Verification is not available for this record yet.';
       }
 
     } catch (error) {
@@ -1014,13 +1575,6 @@
     }
 
     // ── 3. Hide dead Emergency buttons (TODO: wire to Critical request flow) ──
-    document.querySelectorAll('.dash-btn--danger').forEach(function (btn) {
-      if (btn.textContent.trim() === 'Emergency') {
-        // TODO: Wire Emergency to inline Critical request creation when form is merged into request-management
-        btn.style.display = 'none';
-      }
-    });
-
     // ── 4. Build nav per role ─────────────────────────────────────────────────
     const p = window.location.pathname;
 
@@ -1033,14 +1587,10 @@
       navHtml += `<a class="dash-nav__item is-active" href="#">Request Details</a>`;
     }
 
-    navHtml += `<a class="dash-nav__item ${p.includes('donor-verification.html') ? 'is-active' : ''}" href="../requester/donor-verification.html">Donor Verification</a>`;
-
     if (role === 'HospitalAdmin') {
       navHtml += `
-        <a class="dash-nav__item ${p.includes('reports-analytics.html') ? 'is-active' : ''}" href="../requester/reports-analytics.html">Reports</a>
-        <a class="dash-nav__item ${p.includes('settings-profile.html') ? 'is-active' : ''}" href="../requester/settings-profile.html">Settings / Profile</a>
         <div style="margin:16px 12px 8px;font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.06em;">Admin</div>
-        <a class="dash-nav__item ${p.includes('employee-onboarding.html') ? 'is-active' : ''}" href="../hospital-admin/employee-onboarding.html">Employee Onboarding</a>
+        <a class="dash-nav__item ${p.includes('employee-onboarding.html') ? 'is-active' : ''}" href="../hospital-admin/employee-onboarding.html">Employees</a>
       `;
     }
 
@@ -1065,7 +1615,6 @@
     if (page === 'request-management') initRequestManagement();
     if (page === 'new-request') initNewRequest();
     if (page === 'request-details') initRequestDetails();
-    if (page === 'reports-analytics') initReportsAnalytics();
     if (page === 'hospital-management') initHospitalManagement();
     if (page === 'global-settings') initGlobalSettings();
     if (page === 'audit-logs') initAuditLogs();
@@ -1073,9 +1622,8 @@
     if (page === 'employee-onboarding') initEmployeeOnboarding();
     if (page === 'donor-communication') initDonorCommunication();
     if (page === 'donor-verification') initDonorVerification();
-    if (page === 'settings-profile') initSettingsProfile();
-
     if (page === 'system-admin-dashboard') initSystemAdminDashboard();
+    if (page === 'system-admin-hospital-employees') initSystemAdminHospitalEmployees();
     if (page === 'system-admin-create-hospital') initSystemAdminCreateHospital();
     if (page === 'system-admin-create-hospital-admin') initSystemAdminCreateHospitalAdmin();
   });
