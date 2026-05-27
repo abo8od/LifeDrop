@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const storageKey = "lifedrop-theme";
 
   function applyTheme(theme) {
@@ -29,8 +29,19 @@
     wrap.setAttribute("role", "group");
     wrap.setAttribute("aria-label", "Theme switcher");
     wrap.innerHTML = `
-      <button class="theme-switch__btn" data-theme-set="light" type="button" aria-label="Switch to light mode">☀</button>
-      <button class="theme-switch__btn" data-theme-set="dark" type="button" aria-label="Switch to dark mode">☾</button>
+      <button class="theme-switch__btn" data-theme-set="light" type="button" aria-label="Switch to light mode">
+        <svg class="theme-switch__icon" aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <span class="visually-hidden">Light</span>
+      </button>
+      <button class="theme-switch__btn" data-theme-set="dark" type="button" aria-label="Switch to dark mode">
+        <svg class="theme-switch__icon" aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span class="visually-hidden">Dark</span>
+      </button>
     `;
     document.body.appendChild(wrap);
 
@@ -226,6 +237,42 @@
     });
   }
 
+  function enhanceDisclosures() {
+    document.querySelectorAll("details.dash-disclosure").forEach((details) => {
+      if (details.dataset.disclosureEnhanced === "true") return;
+      const summary = details.querySelector("summary");
+      const body = details.querySelector(".dash-disclosure__body");
+      if (!summary || !body) return;
+      details.dataset.disclosureEnhanced = "true";
+
+      summary.addEventListener("click", function (event) {
+        event.preventDefault();
+        const opening = !details.open;
+
+        if (opening) {
+          details.open = true;
+          body.style.maxHeight = "0px";
+          window.requestAnimationFrame(() => {
+            body.style.maxHeight = `${body.scrollHeight}px`;
+          });
+          window.setTimeout(() => {
+            body.style.maxHeight = "";
+          }, 280);
+          return;
+        }
+
+        body.style.maxHeight = `${body.scrollHeight}px`;
+        window.requestAnimationFrame(() => {
+          body.style.maxHeight = "0px";
+        });
+        window.setTimeout(() => {
+          details.open = false;
+          body.style.maxHeight = "";
+        }, 280);
+      });
+    });
+  }
+
   function enhancePasswordToggles() {
     document.querySelectorAll("input[type='password']").forEach((input, index) => {
       if (!input || input.dataset.passwordToggle === "true") return;
@@ -313,8 +360,10 @@
     injectSkipLink();
     injectSidebarToggle();
     enhancePasswordToggles();
+    enhanceDisclosures();
     bindDemoInteractions();
     bindForms();
     bindButtonActions();
   });
 })();
+

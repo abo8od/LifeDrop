@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Create Hospital | LifeDrop Core</title>
+<title>Hospitals | LifeDrop Core</title>
 <link href="../../css/theme.css" rel="stylesheet"/>
 <link href="../../css/style.css" rel="stylesheet"/>
 <link href="../../css/theme-controls.css" rel="stylesheet"/>
@@ -13,20 +13,19 @@
 <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
 </head>
 <body class="light dashboard-body dash-page-light" data-page="system-admin-create-hospital">
-<div class="dash-app">
+<div class="dash-app dash-app--admin">
 <aside class="dash-sidebar dash-sidebar--admin">
-  <div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+  <div class="dash-brand-card">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
     <div>
       <div class="dash-brand__title">LifeDrop Core</div>
-      <div class="dash-brand-card__eyebrow">Admin Portal</div>
+      <div class="dash-brand-card__eyebrow">System Admin Portal</div>
     </div>
   </div>
 
   <nav class="dash-nav">
     <a class="dash-nav__item dash-nav__item--admin" href="dashboard.html">Dashboard</a>
     <a class="dash-nav__item dash-nav__item--admin is-active" href="create-hospital.html">Create Hospital</a>
-    <a class="dash-nav__item dash-nav__item--admin" href="create-hospital-admin.html">Create Admin</a>
   </nav>
 
   <div class="dash-session-card dash-session-card--footer">
@@ -34,49 +33,43 @@
   </div>
 </aside>
 
+<main class="dash-main">
+<header class="dash-topbar">
+  <div class="dash-topbar__group"><div class="dash-link-alert">Admin Console</div></div>
+  <div class="dash-admin-toolbar"><div class="dash-user-chip dash-user-chip--brand">SystemAdmin</div></div>
+</header>
 <div class="dash-content">
-  <section class="dash-onboarding-shell">
-    <aside class="dash-onboarding-hero">
-      <div>
-        <div class="dash-title-hero">Create</div>
-        <div class="dash-title-hero" style="color:var(--muted);">Hospital</div>
-        <p class="dash-subtitle" style="max-width:320px;">
-          Register a new hospital and continue directly to admin assignment.
-        </p>
-      </div>
-      <article class="dash-card">
-        <div class="dash-card__body">
-          <h3 class="dash-title-md" style="margin-bottom:16px;">Status</h3>
-          <div class="dash-metric-list">
-            <div id="ch-result" class="dash-muted">Fill in the form to create a hospital.</div>
-          </div>
-        </div>
-      </article>
-    </aside>
+  <section class="dash-page-header">
+    <div class="dash-stack-2">
+      <h1 class="dash-title-hero">Hospitals</h1>
+    </div>
+  </section>
 
-    <main class="dash-card dash-onboarding-form">
+  <details class="dash-card dash-disclosure" id="create-hospital-panel">
+    <summary class="dash-disclosure__summary">
+      <span class="dash-disclosure__title">Create Hospital</span>
+      <span class="dash-disclosure__hint">Register a hospital and choose its map location</span>
+    </summary>
+    <div class="dash-card__body dash-disclosure__body">
       <form data-api-form id="create-hospital-form" class="dash-stack-6">
         <section class="dash-form-section">
-          <div class="dash-form-section__title">
-            <span class="dash-form-section__icon">🏥</span>Hospital Information
-          </div>
           <div class="dash-form-grid dash-form-grid--2">
-            <div class="dash-field" style="grid-column: 1 / -1;">
+            <div class="dash-field dash-grid-span-full">
               <label class="dash-label" for="hosp-name">Hospital Name</label>
               <input class="dash-input" id="hosp-name" required type="text"/>
             </div>
-            <div class="dash-field" style="grid-column: 1 / -1;">
+            <div class="dash-field dash-grid-span-full">
               <label class="dash-label" for="hosp-address">Address</label>
               <input class="dash-input" id="hosp-address" required type="text"/>
             </div>
-            <div class="dash-field" style="grid-column: 1 / -1;">
+            <div class="dash-field dash-grid-span-full">
               <label class="dash-label" for="hosp-phone">Phone Number</label>
               <input class="dash-input" id="hosp-phone" required type="tel" placeholder="+962790000000"/>
             </div>
-            <div class="dash-field" style="grid-column: 1 / -1;">
+            <div class="dash-field dash-grid-span-full">
               <label class="dash-label">Map Location</label>
               <div id="hospital-map" class="dash-map-picker"></div>
-              <div class="dash-muted" id="hospital-map-status" style="margin-top:8px;">Loading map...</div>
+              <div class="dash-helper" id="hospital-map-status">Loading map...</div>
             </div>
             <div class="dash-field">
               <label class="dash-label" for="hosp-lat">Latitude</label>
@@ -95,9 +88,33 @@
           </button>
         </div>
       </form>
-    </main>
+      <div class="dash-status-slot dash-mt-24" id="ch-result" aria-live="polite"></div>
+    </div>
+  </details>
+
+  <section class="dash-card dash-mb-24">
+    <div class="dash-card-header">
+      <div class="dash-stack-2 dash-stack-tight">
+        <h2 class="dash-title-md">Hospitals</h2>
+        <div class="dash-card-note" id="hospitals-visible-count"></div>
+      </div>
+    </div>
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr><th>Hospital</th><th>Location</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="hospitals-page-tbody">
+          <tr><td colspan="4" class="dash-muted dash-table-message">Loading hospitals...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dash-card-footer">
+      <button class="dash-btn dash-btn--secondary" id="hospitals-show-more-btn" type="button">Show more</button>
+    </div>
   </section>
 </div>
+</main>
 
 <script src="../../js/app.js"></script>
 <script src="../../js/api.js"></script>
@@ -122,3 +139,6 @@
 </script>
 </body>
 </html>
+
+
+

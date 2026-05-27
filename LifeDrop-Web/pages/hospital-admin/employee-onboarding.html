@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -14,7 +14,7 @@
 <body class="light dashboard-body dash-page-light" data-page="employee-onboarding">
 <div class="dash-app">
 <aside class="dash-sidebar dash-sidebar--admin">
-  <div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+  <div class="dash-brand-card">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
     <div>
       <div class="dash-brand__title">LifeDrop Core</div>
@@ -33,32 +33,27 @@
   </div>
 </aside>
 
+<main class="dash-main">
+<header class="dash-topbar">
+  <div class="dash-topbar__group"><div class="dash-link-alert">Admin Console</div></div>
+  <div class="dash-topbar__group"><div class="dash-user-chip">HospitalAdmin</div></div>
+</header>
 <div class="dash-content">
-  <section class="dash-onboarding-shell">
-    <aside class="dash-onboarding-hero">
-      <div>
-        <div class="dash-title-hero">Employee</div>
-        <div class="dash-title-hero" style="color:var(--muted);">Onboarding</div>
-        <p class="dash-subtitle" style="max-width:320px;">
-          Register a new hospital employee account for your facility.
-        </p>
+  <section class="dash-page-header">
+    <div class="dash-row-between">
+      <div class="dash-stack-2">
+        <h1 class="dash-title-hero">Employees</h1>
       </div>
-      <article class="dash-card">
-        <div class="dash-card__body">
-          <h3 class="dash-title-md" style="margin-bottom:16px;">Existing Staff</h3>
-          <div class="dash-metric-list" id="staff-side-list">
-            <div id="staff-list"></div>
-          </div>
-        </div>
-      </article>
-    </aside>
+    </div>
+  </section>
 
-    <main class="dash-card dash-onboarding-form">
+  <details class="dash-card dash-disclosure" id="add-employee-panel">
+    <summary class="dash-disclosure__summary">
+      <span class="dash-disclosure__title">Add Employee</span>
+    </summary>
+    <div class="dash-card__body dash-disclosure__body">
       <form data-api-form id="staff-form" class="dash-stack-6">
         <section class="dash-form-section">
-          <div class="dash-form-section__title">
-            <span class="dash-form-section__icon">👤</span>Personal Information
-          </div>
           <div class="dash-form-grid dash-form-grid--2">
             <div class="dash-field">
               <label class="dash-label" for="staff-full-name">Full Name</label>
@@ -68,7 +63,7 @@
               <label class="dash-label" for="staff-email">Email Address</label>
               <input class="dash-input" id="staff-email" required type="email"/>
             </div>
-            <div class="dash-field" id="staff-phone-field" style="display:none;">
+            <div class="dash-field is-hidden" id="staff-phone-field">
               <label class="dash-label" for="staff-phone">Phone Number</label>
               <input class="dash-input" id="staff-phone" type="tel"/>
             </div>
@@ -82,45 +77,42 @@
             </div>
           </div>
         </section>
-        <div class="dash-row-between">
-          <a class="link" href="global-operations.html">Back</a>
+        <div class="dash-actions">
           <button class="dash-btn dash-btn--primary" data-loading-text="Registering..." type="submit">
             Save &amp; Register
           </button>
         </div>
       </form>
-    </main>
-  </section>
+    </div>
+  </details>
 
-  <section class="dash-card" style="margin-top:24px;">
+  <section class="dash-card">
     <div class="dash-card__body">
-      <div class="dash-row-between" style="margin-bottom:16px;">
+      <div class="dash-row-between dash-mb-16">
         <div>
           <h2 class="dash-title-md">Employee List</h2>
-          <p class="dash-subtitle">Current employee accounts in your hospital.</p>
-          <p class="dash-subtitle" id="staff-activation-note"></p>
         </div>
-        <button class="dash-btn dash-btn--secondary dash-btn--xs" id="staff-show-all-btn" type="button" style="display:none;">Show all</button>
       </div>
       <div class="dash-table-wrap">
         <table class="dash-table">
           <thead>
-            <tr><th>Name</th><th>Email</th><th id="staff-phone-header">Phone</th><th>Role</th><th>Status</th></tr>
+            <tr><th>Name</th><th>Email</th><th id="staff-phone-header">Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody id="staff-table-body">
-            <tr><td colspan="5" class="dash-muted" style="text-align:center;padding:24px;">Loading employees...</td></tr>
+            <tr><td colspan="6" class="dash-muted dash-table-message">Loading employees...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </section>
 </div>
+</main>
 
 <script src="../../js/app.js"></script>
 <script src="../../js/api.js"></script>
 <script src="../../js/pages.js"></script>
 <script>
-  // Auth guard — HospitalAdmin only
+  // Auth guard â€” HospitalAdmin only
   (function () {
     var user = window.LifeDropApi && window.LifeDropApi.getCurrentUser();
     if (!user || user.role !== 'HospitalAdmin') {
@@ -136,3 +128,6 @@
 </script>
 </body>
 </html>
+
+
+

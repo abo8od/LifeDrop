@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en">
 <head>
@@ -14,9 +14,9 @@
 <div class="dash-app">
 <aside class="dash-sidebar">
 <div class="dash-stack-2">
-<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand dash-brand--core">
   <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
-  <div class="dash-stack-2" style="gap:2px;">
+  <div class="dash-stack-2 dash-stack-tight">
     <div class="dash-brand__title">LifeDrop Core</div>
     <div class="dash-brand__subtitle">Blood Management</div>
   </div>
@@ -28,7 +28,7 @@
 <main class="dash-main">
 <header class="dash-topbar">
 <div class="dash-topbar__group">
-<span class="dash-search__icon">⌕</span>
+<span class="dash-search__icon" aria-hidden="true">S</span>
 <div class="dash-link-alert">Live Updates</div>
 </div>
 <div class="dash-topbar__group">
@@ -53,20 +53,20 @@
 <div class="dash-chat-list" id="dc-chat-list">
 <div class="dash-muted">Loading communications...</div>
 </div>
-<div class="dash-row u-inline-53">
-<input class="dash-input u-inline-54" placeholder="Type your message..."/>
+<div class="dash-row dash-inline-list">
+<input class="dash-input dash-flex-1" placeholder="Type your message..."/>
 <button class="dash-btn dash-btn--primary" data-loading-text="Processing..." type="button">Send</button>
 </div>
 </div></article>
 <aside class="dash-grid">
 <article class="dash-call-card dash-stack-5">
 <div class="dash-call-avatar"></div>
-<div class="u-inline-44"><h2 class="dash-title-md">Marcus Thorne</h2><div class="dash-muted">O- Compatible • Confirmed Donor</div></div>
+<div class="text-center"><h2 class="dash-title-md">Marcus Thorne</h2><div class="dash-muted">O- Compatible | Confirmed Donor</div></div>
 <div class="dash-call-timer">04:12</div>
-<div class="dash-call-actions"><button aria-label="Action button" class="dash-icon-btn" type="button">🎙</button><button aria-label="Action button" class="dash-icon-btn u-inline-55" type="button">☎</button><button aria-label="Action button" class="dash-icon-btn" type="button">⟳</button></div>
+<div class="dash-call-actions"><button aria-label="Toggle mic" class="dash-icon-btn" type="button">Mic</button><button aria-label="Call donor" class="dash-icon-btn dash-icon-btn--danger" type="button">Call</button><button aria-label="Hold call" class="dash-icon-btn" type="button">Hold</button></div>
 </article>
 <article class="dash-card"><div class="dash-card__body dash-stack-4">
-<h3 class="dash-title-md u-inline-41">Escalation Checklist</h3>
+<h3 class="dash-title-md">Escalation Checklist</h3>
 <div class="dash-kpi"><strong>Confirm ETA</strong><div class="dash-muted">Verify donor can reach the facility in the critical window.</div></div>
 <div class="dash-kpi"><strong>Identity Check</strong><div class="dash-muted">Cross-check active donor credentials before intake.</div></div>
 <div class="dash-kpi"><strong>Backup Outreach</strong><div class="dash-muted">Ping secondary donor list if no response in 3 minutes.</div></div>
@@ -99,3 +99,6 @@
 </script>
 </body>
 </html>
+
+
+

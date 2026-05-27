@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -15,9 +15,9 @@
 <div class="dash-app">
 <aside class="dash-sidebar">
 <div class="dash-stack-2">
-<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand dash-brand--core">
   <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
-  <div class="dash-stack-2" style="gap:2px;">
+  <div class="dash-stack-2 dash-stack-tight">
     <div class="dash-brand__title">LifeDrop Core</div>
     <div class="dash-brand__subtitle">Blood Management</div>
   </div>
@@ -41,21 +41,21 @@
           <p class="dash-subtitle">Confirm medical eligibility to finalize donation.</p>
         </div>
       </div>
-      <div class="dash-stack-2" style="text-align:right;">
+      <div class="dash-stack-2 dash-text-right">
         <div class="dash-label">Acceptance ID</div>
         <div class="dash-title-md" id="dv-acceptance-id">Loading...</div>
       </div>
     </div>
   </section>
 
-  <div id="dv-error" class="dash-card dash-card--alert" style="display:none;margin-bottom:24px;">
+  <div class="dash-card dash-card--alert is-hidden dash-mb-24" id="dv-error">
     <div class="dash-card__body">
       <div class="dash-title-md" id="dv-error-text"></div>
-      <a class="dash-btn dash-btn--secondary" href="request-management.html" style="margin-top:12px;display:inline-block;">Return to Requests</a>
+      <a class="dash-btn dash-btn--secondary dash-mt-12" href="request-management.html">Return to Requests</a>
     </div>
   </div>
 
-  <section class="dash-grid dash-grid--2" id="dv-content" style="display:none;">
+  <section class="dash-grid dash-grid--2 is-hidden" id="dv-content">
     <article class="dash-card">
       <div class="dash-card__body dash-stack-5">
         <div class="dash-profile-card">
@@ -88,10 +88,10 @@
         <p class="dash-muted">
           Verification will become available as soon as the required donor record is available.
         </p>
-        <div class="dash-card dash-card--alert" style="background:var(--warn-bg,#fffbeb);border-color:var(--warn-border,#fde68a);">
+        <div class="dash-card dash-card--alert dash-banner-warning">
           <div class="dash-card__body">
-            <h3 class="dash-title-md" style="color:var(--warn-text,#92400e);">Verification Pending</h3>
-            <p style="color:var(--warn-text,#92400e);font-size:0.875rem;margin-top:8px;">
+            <h3 class="dash-title-md">Verification Pending</h3>
+            <p class="dash-card-note">
               This donor cannot be verified from this record yet. Please return to this screen once full donor details are available.
             </p>
           </div>
@@ -100,7 +100,7 @@
     </article>
   </section>
 
-  <div class="dash-footer-float" style="display:flex; justify-content:space-between; align-items:center;" id="dv-footer">
+  <div class="dash-footer-float" id="dv-footer">
     <div class="dash-toast">
       <strong>Regulatory Requirement</strong>
       <p class="dash-muted">Verification must be completed within 30 minutes of donation to ensure unit chain of custody.</p>
@@ -133,3 +133,5 @@
 </script>
 </body>
 </html>
+
+

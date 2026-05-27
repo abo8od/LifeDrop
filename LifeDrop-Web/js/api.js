@@ -188,8 +188,8 @@ window.LifeDropApi = (function () {
     // Hospital Employees
     getEmployees:         (pageNumber = 1, pageSize = 10, searchTerm = '') => request(`/Hospitals/employees?pageNumber=${pageNumber}&pageSize=${pageSize}&searchTerm=${encodeURIComponent(searchTerm)}`),
     getEmployee:          (id) => request(`/Hospitals/employees/${id}`),
-    activateEmployee:     (id) => Promise.reject(new Error("Backend missing endpoint: HospitalsController lacks activate employee API for Hospital Admins.")),
-    deactivateEmployee:   (id) => Promise.reject(new Error("Backend missing endpoint: HospitalsController lacks deactivate employee API for Hospital Admins.")),
+    activateEmployee:     (employeeProfileId) => request(`/Hospitals/employees/${employeeProfileId}/activate`, { method: 'PATCH' }),
+    deactivateEmployee:   (employeeProfileId) => request(`/Hospitals/employees/${employeeProfileId}/deactivate`, { method: 'PATCH' }),
 
     // Admin Employees
     getHospitalEmployeesAdmin: (hospitalId) => request(`/Admin/hospitals/${hospitalId}/employees`),

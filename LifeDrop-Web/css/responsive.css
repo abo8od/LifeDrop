@@ -234,3 +234,34 @@ body.dark .toast {
     bottom: 12px;
   }
 }
+
+@media (max-width: 900px) {
+  .dash-table {
+    min-width: 640px;
+  }
+
+  .dash-table th,
+  .dash-table td {
+    padding: 12px;
+  }
+
+  .dash-card-header,
+  .dash-card-footer {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .dash-nav__item {
+    min-height: 44px;
+  }
+
+  .dash-sidebar-toggle {
+    left: 12px;
+    top: 12px;
+  }
+
+  .dash-user-chip {
+    min-height: 36px;
+  }
+}

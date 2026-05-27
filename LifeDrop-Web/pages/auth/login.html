@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en">
 
@@ -22,8 +22,8 @@
 				<div class="auth-panel auth-panel--brand auth-panel--login">
 					<div class="auth-brand-panel">
 						<div class="brand-block">
-							<div class="logo logo--lifedrop auth-logo" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 24px;">
-								<div class="brand-logo-box" style="margin-bottom: 16px;">
+							<div class="logo logo--lifedrop auth-logo auth-logo--stacked">
+								<div class="brand-logo-box">
 									<img alt="LifeDrop Logo" src="../../assets/logo.png" />
 								</div>
 								<div class="logo__text">
@@ -60,13 +60,11 @@
 						<div class="input-group">
 							<div class="row-between">
 								<label class="input-label" for="password">Password</label>
-								<a class="link" href="forgot-password.html">Forgot Password?</a>
 							</div>
-							<input class="input" id="password" name="password" placeholder="••••••••" type="password"
+							<input class="input" id="password" name="password" placeholder="********" type="password"
 								required />
 						</div>
-						<div id="login-error"
-							style="color:#e53e3e;font-size:0.875rem;min-height:1.25rem;margin-bottom:0.25rem;"></div>
+						<div class="login-error" id="login-error"></div>
 						<button class="btn btn-primary btn-with-icon btn-block" id="login-btn"
 							data-loading-text="Signing in..." type="submit">
 							<span>Sign In</span>
@@ -81,7 +79,7 @@
 			<div class="bottom-meta">
 				<span>System Version 4.2.1-Clinical</span>
 				<span>HIPAA Compliant Data Layer</span>
-				<span>© 2024 LifeDrop Core Health Systems</span>
+				<span>(c) 2024 LifeDrop Core Health Systems</span>
 			</div>
 		</div>
 	</main>
@@ -153,3 +151,7 @@
 </body>
 
 </html>
+
+
+
+

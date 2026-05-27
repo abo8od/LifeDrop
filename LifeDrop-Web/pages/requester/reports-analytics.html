@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -14,9 +14,9 @@
 <body class="light dashboard-body" data-page="reports-analytics">
 <div class="dash-app">
 <aside class="dash-sidebar">
-<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand dash-brand--core">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
-    <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-stack-2 dash-stack-tight">
       <div class="dash-brand__title">LifeDrop Core</div>
       <div class="dash-brand__subtitle">Blood Management</div>
     </div>
@@ -36,21 +36,21 @@
     </section>
 
     <!-- Error / Empty State -->
-    <div id="reports-error" class="dash-card dash-card--alert" style="display:none;margin-bottom:24px;">
+    <div class="dash-card dash-card--alert is-hidden dash-mb-24" id="reports-error">
       <div class="dash-card__body">
         <div class="dash-title-md" id="reports-error-text">No analytics data available.</div>
       </div>
     </div>
 
-    <section class="dash-grid dash-layout-aside" style="margin-bottom:24px;" id="reports-content-main">
+    <section class="dash-grid dash-layout-aside dash-mb-24" id="reports-content-main">
       <article class="dash-card">
         <div class="dash-card__body">
-          <div class="dash-row-between" style="margin-bottom:24px;">
+          <div class="dash-row-between dash-mb-24">
             <div>
               <div class="dash-eyebrow">Monthly Donation Trend</div>
               <h2 class="dash-title-md">Unit Inflow by Month</h2>
             </div>
-            <div class="dash-badge dash-badge--normal">API Data</div>
+            <div class="dash-badge dash-badge--normal">Live</div>
           </div>
           <div class="dash-chart-bars dash-chart-bars--10" id="reports-bars"></div>
         </div>
@@ -58,11 +58,11 @@
       <aside class="dash-card">
         <div class="dash-card__body dash-stack-5">
           <h2 class="dash-title-md">Performance Metrics</h2>
-          <div class="dash-metric-item" style="border-bottom:none;">
+          <div class="dash-metric-item dash-metric-item--flat">
             <strong>Avg response time</strong>
-            <span id="reports-response" style="font-weight:600;font-size:1.25rem;">--</span>
+            <span class="dash-metric-value" id="reports-response">--</span>
           </div>
-          <p class="dash-muted" style="font-size:0.875rem;">Average time in minutes to fulfill a request.</p>
+          <p class="dash-card-note">Average time in minutes to fulfill a request.</p>
         </div>
       </aside>
     </section>
@@ -70,7 +70,7 @@
     <section class="dash-grid dash-grid--2" id="reports-content-sub">
       <article class="dash-card">
         <div class="dash-card__body">
-          <h2 class="dash-title-md" style="margin-bottom:16px;">Blood Type Distribution</h2>
+          <h2 class="dash-title-md dash-mb-16">Blood Type Distribution</h2>
           <div class="dash-metric-list" id="reports-mix"></div>
         </div>
       </article>
@@ -99,3 +99,5 @@
 </script>
 </body>
 </html>
+
+

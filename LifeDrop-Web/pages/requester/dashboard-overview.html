@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -14,9 +14,9 @@
 <body class="light dashboard-body" data-page="dashboard-overview">
 <div class="dash-app">
 <aside class="dash-sidebar">
-<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand dash-brand--core">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
-    <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-stack-2 dash-stack-tight">
       <div class="dash-brand__title">LifeDrop Core</div>
       <div class="dash-brand__subtitle">Blood Management</div>
     </div>
@@ -40,8 +40,8 @@
     </div>
   </section>
 
-  <!-- Stat cards — all backed by real DashboardOverviewDto fields -->
-  <section class="dash-grid" style="margin-bottom:24px;grid-template-columns:repeat(5,minmax(0,1fr));">
+  <!-- Stat cards â€” all backed by real DashboardOverviewDto fields -->
+  <section class="dash-grid dash-grid--stats-5 dash-mb-24">
     <article class="dash-card dash-stat-card dash-stat-card--critical">
       <div class="dash-card__body">
         <div class="dash-eyebrow">Active</div>
@@ -84,15 +84,15 @@
     </article>
   </section>
 
-  <section class="dash-grid dash-layout-aside" style="margin-bottom:24px;" id="overview-feed-wrap">
+  <section class="dash-grid dash-layout-aside dash-mb-24" id="overview-feed-wrap">
     <article class="dash-card">
       <div class="dash-card__body">
-        <div class="dash-row-between" style="margin-bottom:24px;">
+        <div class="dash-row-between dash-mb-24">
           <div>
             <div class="dash-eyebrow">Monthly Trend</div>
             <h2 class="dash-title-md">Donations by Month</h2>
           </div>
-          <span class="dash-badge dash-badge--normal">API Data</span>
+          <span class="dash-badge dash-badge--normal">Live</span>
         </div>
         <div class="dash-chart-canvas-wrap" id="ov-chart-bars">
           <canvas id="ov-monthly-chart" aria-label="Monthly donation trend chart"></canvas>
@@ -110,12 +110,12 @@
     </aside>
   </section>
 
-  <section class="dash-grid dash-grid--2" style="margin-bottom:24px;">
+  <section class="dash-grid dash-grid--2 dash-mb-24">
     <article class="dash-card">
       <div class="dash-card__body">
-        <div class="dash-row-between" style="margin-bottom:12px;">
+        <div class="dash-row-between dash-mb-16">
           <h2 class="dash-title-md">Request Status Overview</h2>
-          <span class="dash-badge dash-badge--normal">Dashboard API</span>
+          <span class="dash-badge dash-badge--normal">Live</span>
         </div>
         <div class="dash-chart-canvas-wrap dash-chart-canvas-wrap--compact" id="ov-status-wrap">
           <canvas id="ov-status-chart" aria-label="Request status overview chart"></canvas>
@@ -124,9 +124,9 @@
     </article>
     <article class="dash-card">
       <div class="dash-card__body">
-        <div class="dash-row-between" style="margin-bottom:12px;">
+        <div class="dash-row-between dash-mb-16">
           <h2 class="dash-title-md">Completion Gauge</h2>
-          <span class="dash-badge dash-badge--normal">Dashboard API</span>
+          <span class="dash-badge dash-badge--normal">Live</span>
         </div>
         <div class="dash-chart-canvas-wrap dash-chart-canvas-wrap--compact" id="ov-completion-wrap">
           <canvas id="ov-completion-chart" aria-label="Completion rate gauge chart"></canvas>
@@ -137,8 +137,8 @@
   </section>
 
   <section class="dash-card" id="overview-requests-wrap">
-    <div style="padding:16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-      <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-card-header">
+      <div class="dash-stack-2 dash-stack-tight">
         <h2 class="dash-title-md">Recent Requests</h2>
         <p class="dash-subtitle">Latest 5 requests using the Request Management row format.</p>
       </div>
@@ -160,15 +160,15 @@
   </section>
 
   <!-- Employee Management Placeholder (HospitalAdmin Only) -->
-  <section class="dash-card" id="ha-employee-placeholder" style="display: none; margin-top: 24px;">
-    <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-      <div class="dash-stack-2" style="gap:2px;">
+  <section class="dash-card is-hidden dash-mt-24" id="ha-employee-placeholder">
+    <div class="dash-card-header">
+      <div class="dash-stack-2 dash-stack-tight">
         <h2 class="dash-title-md">Employee Management</h2>
         <p class="dash-subtitle">Manage hospital employees and their access.</p>
         <p class="dash-subtitle" id="emp-activation-note"></p>
       </div>
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <div class="dash-search"><span class="dash-search__icon">⌕</span><input id="emp-search" placeholder="Search employees..." type="text"/></div>
+      <div class="dash-inline-list">
+        <div class="dash-search"><span class="dash-search__icon" aria-hidden="true">S</span><input id="emp-search" placeholder="Search employees..." type="text"/></div>
         <a class="dash-btn dash-btn--primary dash-btn--xs" href="../hospital-admin/employee-onboarding.html">Add Employee</a>
       </div>
     </div>
@@ -187,16 +187,16 @@
         </thead>
         <tbody id="emp-table-body">
           <tr>
-            <td colspan="7" class="dash-muted" style="text-align: center; padding: 24px;">Loading employees...</td>
+            <td colspan="7" class="dash-muted dash-table-message">Loading employees...</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div style="padding: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-      <div class="dash-muted" id="emp-page-indicator" style="font-size: 0.85em;">Page 1</div>
-      <div style="display: flex; gap: 8px;">
-        <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-prev-btn" disabled>Previous</button>
-        <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-next-btn" disabled>Next</button>
+    <div class="dash-card-footer">
+      <div class="dash-card-note" id="emp-page-indicator"></div>
+      <div class="dash-inline-list">
+        <button class="dash-btn dash-btn--secondary dash-btn--xs is-hidden" id="emp-show-more-btn" type="button">Show more</button>
+        <button class="dash-btn dash-btn--secondary dash-btn--xs is-hidden" id="emp-show-less-btn" type="button">Show less</button>
       </div>
     </div>
   </section>
@@ -205,7 +205,7 @@
   <dialog id="emp-details-modal" class="dash-dialog" aria-labelledby="emp-details-title">
     <div class="dash-dialog__header">
       <h2 class="dash-title-md" id="emp-details-title">Employee Details</h2>
-      <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-modal-close" style="padding: 4px 8px;">✕</button>
+      <button class="dash-btn dash-btn--secondary dash-btn--xs" id="emp-modal-close">X</button>
     </div>
     <div class="dash-dialog__body" id="emp-modal-content">
       Loading...
@@ -240,3 +240,5 @@
 </script>
 </body>
 </html>
+
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -14,9 +14,9 @@
 <body class="light dashboard-body" data-page="new-request">
 <div class="dash-app">
 <aside class="dash-sidebar">
-<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand dash-brand--core">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
-    <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-stack-2 dash-stack-tight">
       <div class="dash-brand__title">LifeDrop Core</div>
       <div class="dash-brand__subtitle">Blood Management</div>
     </div>
@@ -28,7 +28,7 @@
 <header class="dash-topbar"><div class="dash-topbar__group"><div class="dash-link-alert">Live Updates</div></div><div class="dash-topbar__group"><div class="dash-user-chip">Admin</div></div></header>
 <div class="dash-content">
 <section class="dash-page-header"><div class="dash-stack-3"><h1 class="dash-title-lg">Create New Request</h1><p class="dash-subtitle">Provide request details and save.</p></div></section>
-<section class="dash-grid dash-layout-aside"><article class="dash-card"><div class="dash-card__body"><form data-api-form id="new-request-form" class="dash-stack-5"><div class="dash-form-grid dash-form-grid--2"><div class="dash-field"><label class="dash-label" for="blood-type">Blood Type</label><select class="dash-input" id="blood-type"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select></div><div class="dash-field"><label class="dash-label" for="priority">Urgency</label><select class="dash-input" id="priority"><option>Normal</option><option>Urgent</option><option>Critical</option></select></div><div class="dash-field" style="grid-column: 1 / -1;"><label class="dash-label" for="units-needed">Units Needed</label><input class="dash-input" id="units-needed" min="1" required type="number" value="1"/></div></div><div class="dash-row-between"><div class="dash-muted" id="new-request-status">Ready to submit</div><button class="dash-btn dash-btn--primary" data-loading-text="Saving..." type="submit">Save Request</button></div></form></div></article><aside class="dash-card"><div class="dash-card__body dash-stack-5"><h2 class="dash-title-md">Request Tips</h2><div class="dash-metric-list"><div class="dash-metric-item"><strong>Blood Type</strong><span>Choose the required blood group.</span></div><div class="dash-metric-item"><strong>Urgency</strong><span>Select the current request priority.</span></div><div class="dash-metric-item"><strong>Units Needed</strong><span>Set the number of units needed.</span></div></div></div></aside></section>
+<section class="dash-grid dash-layout-aside"><article class="dash-card"><div class="dash-card__body"><form data-api-form id="new-request-form" class="dash-stack-5"><div class="dash-form-grid dash-form-grid--2"><div class="dash-field"><label class="dash-label" for="blood-type">Blood Type</label><select class="dash-input" id="blood-type"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select></div><div class="dash-field"><label class="dash-label" for="priority">Urgency</label><select class="dash-input" id="priority"><option>Normal</option><option>Urgent</option><option>Critical</option></select></div><div class="dash-field dash-grid-span-full"><label class="dash-label" for="units-needed">Units Needed</label><input class="dash-input" id="units-needed" min="1" required type="number" value="1"/></div></div><div class="dash-row-between"><div class="dash-muted" id="new-request-status">Ready to submit</div><button class="dash-btn dash-btn--primary" data-loading-text="Saving..." type="submit">Save Request</button></div></form></div></article><aside class="dash-card"><div class="dash-card__body dash-stack-5"><h2 class="dash-title-md">Request Tips</h2><div class="dash-metric-list"><div class="dash-metric-item"><strong>Blood Type</strong><span>Choose the required blood group.</span></div><div class="dash-metric-item"><strong>Urgency</strong><span>Select the current request priority.</span></div><div class="dash-metric-item"><strong>Units Needed</strong><span>Set the number of units needed.</span></div></div></div></aside></section>
 </div></main></div>
 <script src="../../js/app.js"></script>
 <script src="../../js/api.js"></script>
@@ -53,3 +53,5 @@
 </script>
 </body>
 </html>
+
+

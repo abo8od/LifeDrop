@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en">
 <head>
@@ -14,9 +14,9 @@
 <div class="dash-app">
 <aside class="dash-sidebar">
 <div class="dash-stack-2">
-<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand dash-brand--core">
   <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
-  <div class="dash-stack-2" style="gap:2px;">
+  <div class="dash-stack-2 dash-stack-tight">
     <div class="dash-brand__title">LifeDrop Core</div>
     <div class="dash-brand__subtitle">Blood Management</div>
   </div>
@@ -28,7 +28,7 @@
 <main class="dash-main">
 <header class="dash-topbar">
 <div class="dash-topbar__group">
-<span class="dash-search__icon">⌕</span>
+<span class="dash-search__icon" aria-hidden="true">S</span>
 <div class="dash-link-alert">Live Updates</div>
 </div>
 <div class="dash-topbar__group">
@@ -49,8 +49,8 @@
 </div>
 </div>
 </section>
-<section class="dash-grid dash-layout-aside u-inline-83">
-<div class="dash-grid" style="grid-column: 1 / -1; max-width: 800px;">
+<section class="dash-grid dash-layout-aside dash-mb-24">
+<div class="dash-grid dash-grid-span-full dash-max-w-800">
 <article class="dash-card"><div class="dash-card__body dash-stack-6">
 <div class="dash-profile-card">
 <div class="dash-avatar" id="sp-avatar">H</div>
@@ -60,10 +60,10 @@
 </div>
 </div>
 <div class="dash-form-grid dash-form-grid--2">
-<div class="dash-field"><label class="dash-label" id="label-field-1" for="field-1">Hospital Name</label><input class="dash-input" id="field-1" value="" readonly disabled style="background: var(--bg-alt);"/></div>
-<div class="dash-field"><label class="dash-label" for="field-address">Address</label><input class="dash-input" id="field-address" value="" readonly disabled style="background: var(--bg-alt);"/></div>
-<div class="dash-field"><label class="dash-label" id="label-field-2" for="field-2">Latitude</label><input class="dash-input" id="field-2" value="" readonly disabled style="background: var(--bg-alt);"/></div>
-<div class="dash-field"><label class="dash-label" id="label-field-3" for="field-3">Longitude</label><input class="dash-input" id="field-3" value="" readonly disabled style="background: var(--bg-alt);"/></div>
+<div class="dash-field"><label class="dash-label" id="label-field-1" for="field-1">Hospital Name</label><input class="dash-input dash-readonly" id="field-1" value="" readonly disabled/></div>
+<div class="dash-field"><label class="dash-label" for="field-address">Address</label><input class="dash-input dash-readonly" id="field-address" value="" readonly disabled/></div>
+<div class="dash-field"><label class="dash-label" id="label-field-2" for="field-2">Latitude</label><input class="dash-input dash-readonly" id="field-2" value="" readonly disabled/></div>
+<div class="dash-field"><label class="dash-label" id="label-field-3" for="field-3">Longitude</label><input class="dash-input dash-readonly" id="field-3" value="" readonly disabled/></div>
 </div>
 </div></article>
 <article class="dash-card"><div class="dash-card__body dash-stack-5">
@@ -76,7 +76,7 @@
 <thead><tr><th>Member</th><th>Access Level</th><th>Status</th><th></th></tr></thead>
 <tbody id="staff-list-tbody">
   <tr>
-    <td colspan="4" class="dash-muted" style="text-align: center; padding: 32px 16px;">
+    <td colspan="4" class="dash-muted dash-table-message">
       No staff records available yet.
     </td>
   </tr>
@@ -109,3 +109,5 @@
 </script>
 </body>
 </html>
+
+

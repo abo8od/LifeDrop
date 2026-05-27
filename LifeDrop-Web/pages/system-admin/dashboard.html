@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -17,7 +17,7 @@
 <div class="dash-app dash-app--admin">
 
 <aside class="dash-sidebar dash-sidebar--admin">
-  <div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+  <div class="dash-brand-card">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
     <div>
       <div class="dash-brand__title">LifeDrop Core</div>
@@ -28,15 +28,10 @@
   <nav class="dash-nav">
     <a class="dash-nav__item dash-nav__item--admin is-active" href="dashboard.html">Dashboard</a>
     <a class="dash-nav__item dash-nav__item--admin" href="create-hospital.html">Create Hospital</a>
-    <a class="dash-nav__item dash-nav__item--admin" href="create-hospital-admin.html">Create Admin</a>
   </nav>
 
   <div class="dash-session-card dash-session-card--footer">
-    <div class="dash-session-card__avatar" id="go-user-avatar">SA</div>
-    <div>
-      <strong>System Admin</strong>
-      <div class="dash-muted" id="go-user-email">—</div>
-    </div>
+    <a class="dash-nav__item" href="#" id="go-logout-btn">Logout</a>
   </div>
 </aside>
 
@@ -44,7 +39,6 @@
 <header class="dash-topbar">
   <div class="dash-topbar__group"><div class="dash-link-alert">Admin Console</div></div>
   <div class="dash-admin-toolbar">
-    <button class="dash-btn dash-btn--secondary" id="go-logout-btn" type="button">Logout</button>
     <div class="dash-user-chip dash-user-chip--brand">SystemAdmin</div>
   </div>
 </header>
@@ -58,8 +52,8 @@
   </div>
 </section>
 
-<!-- Stats grid — filled by initGlobalOperations() in pages.js -->
-<section class="dash-grid dash-grid--4" style="margin-bottom:24px;" id="sa-dashboard-root">
+<!-- Stats grid â€” filled by initGlobalOperations() in pages.js -->
+<section class="dash-grid dash-grid--4 dash-mb-24" id="sa-dashboard-root">
   <article class="dash-card">
     <div class="dash-card__body">
       <div class="dash-eyebrow">Total Donors</div>
@@ -90,46 +84,36 @@
   </article>
 </section>
 
-<section class="dash-grid dash-grid--2" style="margin-bottom:24px;" id="sa-analytics-wrap">
+<section class="dash-grid dash-grid--2 dash-mb-24" id="sa-analytics-wrap">
   <article class="dash-card">
     <div class="dash-card__body">
-      <div class="dash-row-between" style="margin-bottom:12px;">
+      <div class="dash-row-between dash-mb-16">
         <h2 class="dash-title-md">Regions Distribution</h2>
-        <span class="dash-badge dash-badge--normal">Operations API</span>
+        <span class="dash-badge dash-badge--normal">Live</span>
       </div>
       <div class="dash-chart-canvas-wrap"><canvas id="sa-regions-chart" aria-label="Requests by region chart"></canvas></div>
     </div>
   </article>
   <article class="dash-card">
     <div class="dash-card__body">
-      <div class="dash-row-between" style="margin-bottom:12px;">
+      <div class="dash-row-between dash-mb-16">
         <h2 class="dash-title-md">System Mix</h2>
-        <span class="dash-badge dash-badge--normal">Operations API</span>
+        <span class="dash-badge dash-badge--normal">Live</span>
       </div>
       <div class="dash-chart-canvas-wrap dash-chart-canvas-wrap--compact"><canvas id="sa-mix-chart" aria-label="System mix chart"></canvas></div>
     </div>
   </article>
 </section>
 
-<section class="dash-grid dash-grid--2" style="margin-bottom:24px;">
-  <aside class="dash-card" style="max-width: 520px;">
-    <div class="dash-card__body dash-stack-5">
-      <h2 class="dash-title-md">Active Regions</h2>
-      <p class="dash-subtitle">Requests by governorate.</p>
-      <div id="sa-regions" class="sa-region-list"></div>
-    </div>
-  </aside>
-</section>
-
-<section class="dash-page-header" style="margin-top: 32px;">
+<section class="dash-page-header dash-mt-32">
   <div class="dash-row-between">
     <div class="dash-stack-2">
       <h2 class="dash-title-md">Hospital Management</h2>
       <p class="dash-subtitle">Manage hospitals and access assignments.</p>
     </div>
     <div class="dash-actions">
-      <a class="dash-btn dash-btn--primary" href="create-hospital.html">Create Hospital</a>
-      <button class="dash-btn dash-btn--secondary" id="sa-show-all-hospitals" type="button" style="display:none;">Show all</button>
+      <a class="dash-btn dash-btn--primary" href="create-hospital.html?create=1">Create Hospital</a>
+      <button class="dash-btn dash-btn--secondary is-hidden" id="sa-show-all-hospitals" type="button">Show all</button>
     </div>
   </div>
 </section>
@@ -147,7 +131,7 @@
       </thead>
       <tbody id="sa-hospitals-tbody">
         <tr>
-          <td colspan="4" class="dash-muted" style="text-align: center; padding: 24px;">
+          <td colspan="4" class="dash-muted dash-table-message">
             Loading hospitals...
           </td>
         </tr>
@@ -158,10 +142,10 @@
 
 <!-- Employees Modal -->
 <dialog class="dash-modal" id="sa-emp-modal">
-  <div class="dash-modal__card" style="width: 800px; max-width: 95%;">
+  <div class="dash-modal__card dash-modal__card--wide">
     <div class="dash-modal__header">
       <h3 class="dash-modal__title" id="sa-emp-modal-title">Hospital Employees</h3>
-      <button class="dash-modal__close" id="sa-emp-modal-close" type="button">×</button>
+      <button class="dash-modal__close" id="sa-emp-modal-close" type="button">X</button>
     </div>
     <div class="dash-modal__body">
       <div class="dash-table-wrap">
@@ -192,20 +176,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="../../js/pages.js"></script>
 <script>
-  // Populate user email in sidebar from JWT and check Auth
   document.addEventListener('DOMContentLoaded', function () {
     var user = window.LifeDropApi && LifeDropApi.getCurrentUser();
     if (!user || user.role !== 'SystemAdmin') {
       window.location.replace('../auth/login.html');
       return;
     }
-    if (user && user.email) {
-      var el = document.getElementById('go-user-email');
-      if (el) el.textContent = user.email;
-    }
     var logoutBtn = document.getElementById('go-logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', function () {
+      logoutBtn.addEventListener('click', function (e) {
+        e.preventDefault();
         LifeDropApi.clearTokens();
         window.location.href = '../../pages/auth/login.html';
       });
@@ -214,3 +194,4 @@
 </script>
 </body>
 </html>
+

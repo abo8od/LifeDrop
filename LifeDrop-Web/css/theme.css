@@ -27,15 +27,17 @@
 	--brand-red-glow: rgba(201, 23, 38, 0.28);
 	--brand-green: #22c55e;
 
+	--radius-xs: 8px;
 	--radius-sm: 12px;
-	--radius-md: 18px;
-	--radius-lg: 28px;
-	--radius-xl: 36px;
+	--radius-md: 16px;
+	--radius-lg: 24px;
+	--radius-xl: 32px;
 
 	--shadow-light: 0 20px 60px rgba(0, 0, 0, 0.08);
 	--shadow-dark: 0 0 80px rgba(27, 91, 190, 0.12);
 	--shadow-card: 0 14px 34px rgba(0, 0, 0, 0.06);
 
+	--space-1: 4px;
 	--space-2: 8px;
 	--space-3: 12px;
 	--space-4: 16px;
@@ -45,6 +47,10 @@
 	--space-8: 32px;
 	--space-10: 40px;
 	--space-12: 48px;
+	--space-14: 56px;
+	--space-16: 64px;
+
+	--focus-ring: 0 0 0 3px rgba(13, 86, 166, 0.22);
 
 	--transition-fast: 0.2s ease;
 }

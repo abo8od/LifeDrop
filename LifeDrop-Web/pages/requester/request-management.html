@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -14,9 +14,9 @@
 <body class="light dashboard-body" data-page="request-management">
 <div class="dash-app">
 <aside class="dash-sidebar">
-<div class="dash-brand" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand dash-brand--core">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
-    <div class="dash-stack-2" style="gap:2px;">
+    <div class="dash-stack-2 dash-stack-tight">
       <div class="dash-brand__title">LifeDrop Core</div>
       <div class="dash-brand__subtitle">Blood Management</div>
     </div>
@@ -32,25 +32,17 @@
   <div class="dash-row-between">
     <div class="dash-stack-2">
       <h1 class="dash-title-xl">Request Management</h1>
-      <p class="dash-subtitle">Real request data from the backend.</p>
-    </div>
-    <div class="dash-actions">
-      <button class="dash-btn dash-btn--primary" type="button"
-        onclick="(function(){var p=document.getElementById('rm-new-request-panel');if(p.hasAttribute('open')){p.removeAttribute('open');}else{p.setAttribute('open','');}})()">
-        + New Request
-      </button>
-      <button class="dash-btn dash-btn--secondary" id="rm-show-all-btn" type="button" style="display:none;">Show all</button>
     </div>
   </div>
 </section>
 
 <!-- Collapsible inline new-request form -->
-<details class="dash-card" id="rm-new-request-panel" style="margin-bottom:24px;">
-  <summary style="cursor:pointer;padding:16px 20px;font-weight:600;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-    <span>Create Blood Donation Request</span>
-    <span class="dash-muted" style="font-size:0.8em;font-weight:400;">Select a governorate, then pick districts</span>
+<details class="dash-card dash-disclosure" id="rm-new-request-panel">
+  <summary class="dash-disclosure__summary">
+    <span class="dash-disclosure__title">Create Blood Donation Request</span>
+    <span class="dash-disclosure__hint">Select a governorate, then pick districts</span>
   </summary>
-  <div class="dash-card__body" style="border-top:1px solid var(--border,#e5e7eb);padding-top:20px;">
+  <div class="dash-card__body dash-disclosure__body">
     <form class="dash-stack-5" id="rm-new-request-form">
       <div class="dash-form-grid dash-form-grid--2">
         <div class="dash-field">
@@ -73,28 +65,22 @@
         <div class="dash-field">
           <label class="dash-label" for="rm-governorate">Governorate</label>
           <select class="dash-input" id="rm-governorate" data-role="governorate">
-            <option value="">Loading…</option>
+            <option value="">Loading...</option>
           </select>
         </div>
-        <div class="dash-field" style="grid-column:1/-1;">
+        <div class="dash-field dash-grid-span-full">
           <label class="dash-label" for="rm-districts">Districts <span class="dash-muted">(hold Ctrl/Cmd to select multiple)</span></label>
-          <select class="dash-input" id="rm-districts" data-role="districts" multiple disabled style="min-height:100px;">
+          <select class="dash-input dash-input--multi" id="rm-districts" data-role="districts" multiple disabled>
           </select>
         </div>
       </div>
       <div class="dash-row-between">
         <span class="dash-muted" data-role="status" id="rm-form-status">Ready to submit</span>
-        <button class="dash-btn dash-btn--primary" data-loading-text="Saving…" type="submit">Save Request</button>
+        <button class="dash-btn dash-btn--primary" data-loading-text="Saving..." type="submit">Save Request</button>
       </div>
     </form>
   </div>
 </details>
-
-<section class="dash-mini-card-row" style="margin-bottom:24px;">
-  <article class="dash-card"><div class="dash-card__body"><div class="dash-title-md">Active Requests</div><div class="dash-stat-card__value" id="rm-active-count">--</div></div></article>
-  <article class="dash-card"><div class="dash-card__body"><div class="dash-title-md">Average Progress</div><div class="dash-stat-card__value" id="rm-avg-progress">--</div></div></article>
-  <article class="dash-card dash-card--alert"><div class="dash-card__body"><div class="dash-title-md">Critical Gaps</div><div class="dash-stat-card__value" id="rm-critical-gap">--</div></div></article>
-</section>
 
 <section class="dash-card" id="requests-table-wrap">
   <div class="dash-table-wrap">
@@ -131,3 +117,5 @@
 </script>
 </body>
 </html>
+
+

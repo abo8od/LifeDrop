@@ -14,18 +14,18 @@
 <body class="light dashboard-body" data-page="global-settings">
 <div class="dash-app dash-app--admin">
 <aside class="dash-sidebar dash-sidebar--admin">
-<div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+<div class="dash-brand-card">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
     <div>
       <div class="dash-brand__title">LifeDrop Core</div>
       <div class="dash-brand-card__eyebrow">Superadmin Portal</div>
     </div>
   </div>
-<nav class="dash-nav"><a class="dash-nav__item dash-nav__item--admin" href="global-operations.html">Dashboard</a><a class="dash-nav__item dash-nav__item--admin" href="hospital-management.html">Hospital Management</a><a class="dash-nav__item dash-nav__item--admin" href="audit-logs.html">Audit Logs</a><a class="dash-nav__item dash-nav__item--admin" href="global-settings.html">Global Settings</a><a class="dash-nav__item dash-nav__item--admin" href="employee-onboarding.html">Employees</a></nav>
-<div class="dash-session-card dash-session-card--footer"><div class="dash-session-card__avatar">AS</div><div><strong>Admin Session</strong><div class="dash-muted">ID: 992-VC-01</div></div></div>
+<nav class="dash-nav"><a class="dash-nav__item dash-nav__item--admin" href="global-operations.html">Dashboard</a><a class="dash-nav__item dash-nav__item--admin" href="hospital-management.html">Hospital Management</a><a class="dash-nav__item dash-nav__item--admin" href="audit-logs.html">Audit Logs</a><a class="dash-nav__item dash-nav__item--admin is-active" href="global-settings.html">Global Settings</a><a class="dash-nav__item dash-nav__item--admin" href="employee-onboarding.html">Employees</a></nav>
+<div class="dash-sidebar__footer"><a class="dash-nav__item" href="#" id="sidebar-logout-btn">Logout</a></div>
 </aside>
-<main class="dash-main"><header class="dash-topbar"><div class="dash-search dash-admin-search"><span class="dash-search__icon">⌕</span><input placeholder="Search hospitals, logs, or donor IDs..." type="text"/></div><div class="dash-admin-toolbar"><a class="dash-toolbar-link" href="#">Support</a><div class="dash-user-chip dash-user-chip--brand">LifeDrop Core</div></div></header><div class="dash-content">
-<div id="global-settings-root"><section class="dash-page-header"><div class="dash-stack-2"><h1 class="dash-title-hero">Global System Settings & Rules</h1><p class="dash-subtitle">These controls read from and write to the API.</p></div></section><section class="dash-grid dash-layout-aside"><article class="dash-card"><div class="dash-card__body"><form data-api-form id="global-settings-form" class="dash-stack-6"><div class="dash-form-grid dash-form-grid--2"><div class="dash-field"><label class="dash-label" for="cooldown-days">Male Donor Cooldown (days)</label><input class="dash-input" id="cooldown-days" min="1" type="number"/></div><div class="dash-field"><label class="dash-label" for="donation-points">Points for Donation</label><input class="dash-input" id="donation-points" min="1" type="number"/></div></div><div class="dash-field"><label class="dash-label" for="matching-radius">Matching Radius</label><input id="matching-radius" max="100" min="5" type="range" value="45"/><div class="dash-user-chip" id="matching-radius-output">45 KM</div></div><label class="dash-check-row"><input id="emergency-broadcast" type="checkbox"/><span>Enable Emergency Broadcast to ineligible donors</span></label><div class="dash-row-between"><div class="dash-muted" id="settings-last-modified">--</div><button class="dash-btn dash-btn--primary" data-loading-text="Saving..." type="submit">Save Global Changes</button></div></form></div></article><aside class="dash-card"><div class="dash-card__body dash-stack-5"><div class="dash-metric-item"><strong>WHO Standards</strong><span>2024 update</span></div><div class="dash-metric-item"><strong>Protected By</strong><span>RSA-4096</span></div><div class="dash-metric-item"><strong>Scope</strong><span>All connected hospitals</span></div></div></aside></section></div>
+<main class="dash-main"><header class="dash-topbar"><div class="dash-search dash-admin-search"><span class="dash-search__icon" aria-hidden="true">S</span><input placeholder="Search hospitals, logs, or donor IDs..." type="text"/></div><div class="dash-admin-toolbar"><div class="dash-user-chip dash-user-chip--brand">LifeDrop Core</div></div></header><div class="dash-content">
+<div id="global-settings-root"><section class="dash-page-header"><div class="dash-stack-2"><h1 class="dash-title-hero">Global System Settings & Rules</h1></div></section><section class="dash-grid dash-layout-aside"><article class="dash-card"><div class="dash-card__body"><form data-api-form id="global-settings-form" class="dash-stack-6"><div class="dash-form-grid dash-form-grid--2"><div class="dash-field"><label class="dash-label" for="cooldown-days">Male Donor Cooldown (days)</label><input class="dash-input" id="cooldown-days" min="1" type="number"/></div><div class="dash-field"><label class="dash-label" for="donation-points">Points for Donation</label><input class="dash-input" id="donation-points" min="1" type="number"/></div></div><div class="dash-field"><label class="dash-label" for="matching-radius">Matching Radius</label><input id="matching-radius" max="100" min="5" type="range" value="45"/><div class="dash-user-chip" id="matching-radius-output">45 KM</div></div><label class="dash-check-row"><input id="emergency-broadcast" type="checkbox"/><span>Enable Emergency Broadcast to ineligible donors</span></label><div class="dash-row-between"><div class="dash-muted" id="settings-last-modified">--</div><button class="dash-btn dash-btn--primary" data-loading-text="Saving..." type="submit">Save Global Changes</button></div></form></div></article><aside class="dash-card"><div class="dash-card__body dash-stack-5"><div class="dash-metric-item"><strong>WHO Standards</strong><span>2024 update</span></div><div class="dash-metric-item"><strong>Protected By</strong><span>RSA-4096</span></div><div class="dash-metric-item"><strong>Scope</strong><span>All connected hospitals</span></div></div></aside></section></div>
 </div></main></div>
 <script src="../../js/app.js"></script>
 <script src="../../js/api.js"></script>
@@ -36,17 +36,19 @@
       window.location.replace('../../pages/auth/login.html');
     }
     document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('a').forEach(function (link) {
-        if (link.textContent.trim() === 'Logout') {
-          link.addEventListener('click', function (e) {
-            e.preventDefault();
-            LifeDropApi.clearTokens();
-            window.location.href = '../../pages/auth/login.html';
-          });
-        }
+      ['go-logout-btn', 'sidebar-logout-btn'].forEach(function (id) {
+        var btn = document.getElementById(id);
+        if (!btn) return;
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          LifeDropApi.clearTokens();
+          window.location.href = '../../pages/auth/login.html';
+        });
       });
     });
   })();
 </script>
 </body>
 </html>
+
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -17,7 +17,7 @@
 <div class="dash-app dash-app--admin">
 
 <aside class="dash-sidebar dash-sidebar--admin">
-  <div class="dash-brand-card" style="display: flex; align-items: center; gap: 10px;">
+  <div class="dash-brand-card">
     <div class="brand-logo-box"><img src="../../assets/logo.png" alt="LifeDrop Logo" /></div>
     <div>
       <div class="dash-brand__title">LifeDrop Core</div>
@@ -34,22 +34,17 @@
   </nav>
 
   <div class="dash-session-card dash-session-card--footer">
-    <div class="dash-session-card__avatar" id="go-user-avatar">SA</div>
-    <div>
-      <strong>System Admin</strong>
-      <div class="dash-muted" id="go-user-email">—</div>
-    </div>
+    <a class="dash-nav__item" href="#" id="go-logout-btn">Logout</a>
   </div>
 </aside>
 
 <main class="dash-main">
 <header class="dash-topbar">
   <div class="dash-search dash-admin-search">
-    <span class="dash-search__icon">⌕</span>
+    <span class="dash-search__icon" aria-hidden="true">S</span>
     <input placeholder="System admin view..." type="text"/>
   </div>
   <div class="dash-admin-toolbar">
-    <button class="dash-btn dash-btn--secondary" id="go-logout-btn" type="button">Logout</button>
     <div class="dash-user-chip dash-user-chip--brand">SystemAdmin</div>
   </div>
 </header>
@@ -63,8 +58,8 @@
   </div>
 </section>
 
-<!-- Stats grid — filled by initGlobalOperations() in pages.js -->
-<section class="dash-grid dash-grid--4" style="margin-bottom:24px;" id="global-operations-root">
+<!-- Stats grid â€” filled by initGlobalOperations() in pages.js -->
+<section class="dash-grid dash-grid--4 dash-mb-24" id="global-operations-root">
   <article class="dash-card">
     <div class="dash-card__body">
       <div class="dash-eyebrow">Total Donors</div>
@@ -91,7 +86,7 @@
   </article>
 </section>
 
-<!-- Activity feed + regions — filled by initGlobalOperations() -->
+<!-- Activity feed + regions â€” filled by initGlobalOperations() -->
 <section class="dash-grid dash-layout-aside">
   <article class="dash-card">
     <div class="dash-card__body dash-stack-5">
@@ -105,7 +100,7 @@
   <aside class="dash-card">
     <div class="dash-card__body dash-stack-5">
       <h2 class="dash-title-md">Active Regions</h2>
-      <div id="go-regions" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      <div class="dash-inline-list" id="go-regions"></div>
     </div>
   </aside>
 </section>
@@ -118,16 +113,11 @@
 <script src="../../js/api.js"></script>
 <script src="../../js/pages.js"></script>
 <script>
-  // Populate user email in sidebar from JWT
   document.addEventListener('DOMContentLoaded', function () {
-    var user = window.LifeDropApi && LifeDropApi.getCurrentUser();
-    if (user && user.email) {
-      var el = document.getElementById('go-user-email');
-      if (el) el.textContent = user.email;
-    }
     var logoutBtn = document.getElementById('go-logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', function () {
+      logoutBtn.addEventListener('click', function (e) {
+        e.preventDefault();
         LifeDropApi.clearTokens();
         window.location.href = '../../pages/auth/login.html';
       });
@@ -136,3 +126,5 @@
 </script>
 </body>
 </html>
+
+
